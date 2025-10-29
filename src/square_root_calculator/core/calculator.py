@@ -93,6 +93,26 @@ class CalculationResult:
                         representations['fraction'] = f"{frac.numerator}/{frac.denominator}"
                 except:
                     pass
+        elif self.is_complex and len(self.roots) > 0:
+            # Alternative forms for complex numbers
+            import math
+            real_val, imag_val = self.roots[0]
+            
+            # Convert to polar form (r, θ)
+            try:
+                r = math.sqrt(float(real_val)**2 + float(imag_val)**2)
+                theta = math.atan2(float(imag_val), float(real_val))
+                theta_deg = math.degrees(theta)
+                
+                r_fmt = self._format_decimal(Decimal(str(r)), min(10, self.precision))
+                theta_fmt = self._format_decimal(Decimal(str(theta)), min(10, self.precision))
+                
+                representations['polar'] = f"{r_fmt} ∠ {theta_fmt} rad ({theta_deg:.2f}°)"
+                
+                # Exponential form: r * e^(iθ)
+                representations['exponential'] = f"{r_fmt} * e^(i*{theta_fmt})"
+            except:
+                pass
         
         return representations
 

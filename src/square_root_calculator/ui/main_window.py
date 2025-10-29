@@ -1,6 +1,7 @@
 """Main GUI window for the Square Root Calculator."""
 
 import sys
+import webbrowser
 from decimal import Decimal
 from PyQt6.QtWidgets import (
     QApplication, QMainWindow, QWidget, QVBoxLayout, QHBoxLayout,
@@ -8,12 +9,19 @@ from PyQt6.QtWidgets import (
     QGroupBox, QRadioButton, QButtonGroup, QMessageBox, QMenuBar, QMenu,
     QSlider, QTabWidget, QListWidget, QSplitter
 )
-from PyQt6.QtCore import Qt, QThread, pyqtSignal
-from PyQt6.QtGui import QAction
+from PyQt6.QtCore import Qt, QThread, pyqtSignal, QUrl
+from PyQt6.QtGui import QAction, QDesktopServices
+
+try:
+    from qt_material import apply_stylesheet
+    HAS_QT_MATERIAL = True
+except ImportError:
+    HAS_QT_MATERIAL = False
 
 from ..core.calculator import SquareRootCalculator, InvalidInputError, CalculatorError, CalculationResult
 from ..core.history import HistoryManager
 from ..core.update_checker import UpdateChecker
+from ..core.settings import Settings
 from ..locales.translator import Translator
 from .. import __version__
 
@@ -38,11 +46,21 @@ class MainWindow(QMainWindow):
     
     def __init__(self):
         super().__init__()
-        self.calculator = SquareRootCalculator()
-        self.translator = Translator('en')
+        self.settings = Settings()
+        
+        # Initialize with settings
+        lang = self.settings.get('language', 'en')
+        precision = self.settings.get('precision', 4)
+        
+        self.calculator = SquareRootCalculator(precision=precision)
+        self.translator = Translator(lang)
         self.history = HistoryManager()
         self.update_checker = UpdateChecker('ijo42', 'square-root-calculator', __version__)
+        
         self.init_ui()
+        
+        # Apply theme after UI is created
+        self.apply_theme(self.settings.get('theme', 'light'))
         
         # Check for updates on startup (non-blocking)
         self.check_for_updates_async()
@@ -117,7 +135,8 @@ class MainWindow(QMainWindow):
         precision_value_layout = QHBoxLayout()
         self.precision_label = QLabel()
         precision_value_layout.addWidget(self.precision_label)
-        self.precision_value_label = QLabel('50')
+        initial_precision = self.settings.get('precision', 4)
+        self.precision_value_label = QLabel(str(initial_precision))
         self.precision_value_label.setStyleSheet("font-weight: bold; font-size: 14px;")
         precision_value_layout.addWidget(self.precision_value_label)
         precision_value_layout.addStretch()
@@ -129,7 +148,7 @@ class MainWindow(QMainWindow):
         self.precision_slider = QSlider(Qt.Orientation.Horizontal)
         self.precision_slider.setMinimum(1)
         self.precision_slider.setMaximum(200)
-        self.precision_slider.setValue(50)
+        self.precision_slider.setValue(initial_precision)
         self.precision_slider.setTickPosition(QSlider.TickPosition.TicksBelow)
         self.precision_slider.setTickInterval(20)
         self.precision_slider.valueChanged.connect(self.precision_slider_changed)
@@ -137,19 +156,24 @@ class MainWindow(QMainWindow):
         slider_layout.addWidget(QLabel('200'))
         precision_layout.addLayout(slider_layout)
         
-        # SpinBox for precise input
-        spinbox_layout = QHBoxLayout()
+        # SpinBox for precise input (hidden by default)
+        self.spinbox_layout = QHBoxLayout()
         spinbox_label = QLabel()
         self.spinbox_label = spinbox_label
-        spinbox_layout.addWidget(spinbox_label)
+        self.spinbox_layout.addWidget(spinbox_label)
         self.precision_spinbox = QSpinBox()
         self.precision_spinbox.setMinimum(1)
         self.precision_spinbox.setMaximum(1000)
-        self.precision_spinbox.setValue(50)
+        self.precision_spinbox.setValue(initial_precision)
         self.precision_spinbox.valueChanged.connect(self.precision_spinbox_changed)
-        spinbox_layout.addWidget(self.precision_spinbox)
-        spinbox_layout.addStretch()
-        precision_layout.addLayout(spinbox_layout)
+        self.spinbox_layout.addWidget(self.precision_spinbox)
+        self.spinbox_layout.addStretch()
+        precision_layout.addLayout(self.spinbox_layout)
+        
+        # Hide spinbox by default if setting is False
+        if not self.settings.get('show_exact_precision', False):
+            self.spinbox_label.hide()
+            self.precision_spinbox.hide()
         
         precision_group.setLayout(precision_layout)
         layout.addWidget(precision_group)
@@ -224,22 +248,64 @@ class MainWindow(QMainWindow):
         """Create the menu bar."""
         menubar = self.menuBar()
         
+        # Settings menu
+        self.settings_menu = menubar.addMenu('Settings')
+        
+        # Theme submenu
+        self.theme_menu = QMenu('Theme', self)
+        self.settings_menu.addMenu(self.theme_menu)
+        
+        self.light_theme_action = QAction('Light Theme', self)
+        self.light_theme_action.setCheckable(True)
+        self.light_theme_action.setChecked(self.settings.get('theme') == 'light')
+        self.light_theme_action.triggered.connect(lambda: self.change_theme('light'))
+        self.theme_menu.addAction(self.light_theme_action)
+        
+        self.dark_theme_action = QAction('Dark Theme', self)
+        self.dark_theme_action.setCheckable(True)
+        self.dark_theme_action.setChecked(self.settings.get('theme') == 'dark')
+        self.dark_theme_action.triggered.connect(lambda: self.change_theme('dark'))
+        self.theme_menu.addAction(self.dark_theme_action)
+        
+        self.settings_menu.addSeparator()
+        
+        # Show exact precision field toggle
+        self.show_exact_precision_action = QAction('Show Exact Precision Field', self)
+        self.show_exact_precision_action.setCheckable(True)
+        self.show_exact_precision_action.setChecked(self.settings.get('show_exact_precision', False))
+        self.show_exact_precision_action.triggered.connect(self.toggle_exact_precision)
+        self.settings_menu.addAction(self.show_exact_precision_action)
+        
+        # Show negative roots toggle
+        self.show_negative_roots_action = QAction('Show Negative Roots', self)
+        self.show_negative_roots_action.setCheckable(True)
+        self.show_negative_roots_action.setChecked(self.settings.get('show_negative_roots', False))
+        self.show_negative_roots_action.triggered.connect(self.toggle_negative_roots)
+        self.settings_menu.addAction(self.show_negative_roots_action)
+        
         # Language menu
         self.language_menu = menubar.addMenu('Language')
         
         self.english_action = QAction('English', self)
         self.english_action.setCheckable(True)
-        self.english_action.setChecked(True)
+        self.english_action.setChecked(self.settings.get('language') == 'en')
         self.english_action.triggered.connect(lambda: self.change_language_from_menu('en'))
         self.language_menu.addAction(self.english_action)
         
         self.russian_action = QAction('Русский', self)
         self.russian_action.setCheckable(True)
+        self.russian_action.setChecked(self.settings.get('language') == 'ru')
         self.russian_action.triggered.connect(lambda: self.change_language_from_menu('ru'))
         self.language_menu.addAction(self.russian_action)
         
         # Help menu
         self.help_menu = menubar.addMenu('Help')
+        
+        self.user_manual_action = QAction('User Manual', self)
+        self.user_manual_action.triggered.connect(self.open_user_manual)
+        self.help_menu.addAction(self.user_manual_action)
+        
+        self.help_menu.addSeparator()
         
         self.check_updates_action = QAction('Check for Updates', self)
         self.check_updates_action.triggered.connect(self.check_for_updates_manual)
@@ -283,8 +349,15 @@ class MainWindow(QMainWindow):
         self.history_group.setTitle(self.translator.get('history_label'))
         
         # Update menu actions
+        self.settings_menu.setTitle(self.translator.get('settings'))
+        self.theme_menu.setTitle(self.translator.get('theme'))
+        self.light_theme_action.setText(self.translator.get('theme_light'))
+        self.dark_theme_action.setText(self.translator.get('theme_dark'))
+        self.show_exact_precision_action.setText(self.translator.get('show_exact_precision'))
+        self.show_negative_roots_action.setText(self.translator.get('show_negative_roots'))
         self.language_menu.setTitle(self.translator.get('language_menu'))
         self.help_menu.setTitle(self.translator.get('help'))
+        self.user_manual_action.setText(self.translator.get('user_manual'))
         self.check_updates_action.setText(self.translator.get('check_updates'))
         self.about_action.setText(self.translator.get('about'))
         self.help_action.setText(self.translator.get('help'))
@@ -292,12 +365,77 @@ class MainWindow(QMainWindow):
     def change_language_from_menu(self, language_code):
         """Handle language change from menu."""
         self.translator.set_language(language_code)
+        self.settings.set('language', language_code)
         
         # Update menu checkmarks
         self.english_action.setChecked(language_code == 'en')
         self.russian_action.setChecked(language_code == 'ru')
         
         self.update_ui_text()
+    
+    def change_theme(self, theme):
+        """Change application theme."""
+        self.settings.set('theme', theme)
+        self.light_theme_action.setChecked(theme == 'light')
+        self.dark_theme_action.setChecked(theme == 'dark')
+        self.apply_theme(theme)
+    
+    def apply_theme(self, theme):
+        """Apply the specified theme."""
+        if HAS_QT_MATERIAL:
+            try:
+                if theme == 'dark':
+                    apply_stylesheet(QApplication.instance(), theme='dark_blue.xml')
+                else:
+                    apply_stylesheet(QApplication.instance(), theme='light_blue.xml')
+            except Exception as e:
+                print(f"Could not apply theme: {e}")
+        else:
+            # Fallback to basic Qt style
+            if theme == 'dark':
+                QApplication.instance().setStyleSheet("""
+                    QWidget {
+                        background-color: #2b2b2b;
+                        color: #ffffff;
+                    }
+                    QLineEdit, QTextEdit, QSpinBox {
+                        background-color: #3c3c3c;
+                        border: 1px solid #555555;
+                    }
+                    QPushButton {
+                        background-color: #0066cc;
+                        border: none;
+                        padding: 5px;
+                    }
+                    QPushButton:hover {
+                        background-color: #0077ee;
+                    }
+                """)
+            else:
+                QApplication.instance().setStyleSheet("")
+    
+    def toggle_exact_precision(self):
+        """Toggle visibility of exact precision spinbox."""
+        show = self.show_exact_precision_action.isChecked()
+        self.settings.set('show_exact_precision', show)
+        
+        if show:
+            self.spinbox_label.show()
+            self.precision_spinbox.show()
+        else:
+            self.spinbox_label.hide()
+            self.precision_spinbox.hide()
+    
+    def toggle_negative_roots(self):
+        """Toggle showing negative roots."""
+        show = self.show_negative_roots_action.isChecked()
+        self.settings.set('show_negative_roots', show)
+        # Will be used in display_result method
+    
+    def open_user_manual(self):
+        """Open user manual in browser."""
+        url = "https://github.com/ijo42/square-root-calculator/blob/master/README.md"
+        QDesktopServices.openUrl(QUrl(url))
     
     def precision_slider_changed(self, value):
         """Handle precision slider change."""
@@ -307,6 +445,7 @@ class MainWindow(QMainWindow):
         self.precision_spinbox.blockSignals(False)
         try:
             self.calculator.set_precision(value)
+            self.settings.set('precision', value)
         except Exception as e:
             self.show_error(str(e))
     
@@ -319,6 +458,7 @@ class MainWindow(QMainWindow):
             self.precision_slider.blockSignals(False)
         try:
             self.calculator.set_precision(value)
+            self.settings.set('precision', value)
         except Exception as e:
             self.show_error(str(e))
     
@@ -365,14 +505,26 @@ class MainWindow(QMainWindow):
         output += f"<p style='margin: 10px 0 5px 0;'><b>{self.translator.get('roots_label')}</b></p>"
         
         formatted_roots = result.get_formatted_roots()
-        if len(formatted_roots) >= 2:
-            output += f"<p style='margin: 3px 0 3px 20px; color: #0066cc;'><b>{self.translator.get('root_positive')}</b> +√({result.input_value}) = {formatted_roots[0]}</p>"
-            output += f"<p style='margin: 3px 0 3px 20px; color: #0066cc;'><b>{self.translator.get('root_negative')}</b> -√({result.input_value}) = {formatted_roots[1]}</p>"
+        show_negative = self.settings.get('show_negative_roots', False)
         
-        # Representations (for real numbers only)
-        if not result.is_complex:
-            representations = result.get_representations()
-            if representations:
+        if len(formatted_roots) >= 1:
+            output += f"<p style='margin: 3px 0 3px 20px; color: #0066cc;'><b>{self.translator.get('root_positive')}</b> +√({result.input_value}) = {formatted_roots[0]}</p>"
+            
+            if show_negative and len(formatted_roots) >= 2:
+                output += f"<p style='margin: 3px 0 3px 20px; color: #0066cc;'><b>{self.translator.get('root_negative')}</b> -√({result.input_value}) = {formatted_roots[1]}</p>"
+        
+        # Representations/Alternative forms
+        representations = result.get_representations()
+        if representations:
+            if result.is_complex:
+                output += f"<p style='margin: 10px 0 5px 0;'><b>{self.translator.get('alternative_forms')}</b></p>"
+                
+                if 'polar' in representations:
+                    output += f"<p style='margin: 3px 0 3px 20px;'><b>{self.translator.get('polar_form')}</b> {representations['polar']}</p>"
+                
+                if 'exponential' in representations:
+                    output += f"<p style='margin: 3px 0 3px 20px;'><b>{self.translator.get('exponential_form')}</b> {representations['exponential']}</p>"
+            else:
                 output += f"<p style='margin: 10px 0 5px 0;'><b>{self.translator.get('representations_label')}</b></p>"
                 
                 if 'decimal' in representations:
@@ -412,9 +564,26 @@ class MainWindow(QMainWindow):
                 self.history_list.addItem(item_text)
     
     def history_item_clicked(self, item):
-        """Handle click on history item."""
-        # Could potentially restore the calculation
-        pass
+        """Handle click on history item - display result in result pane."""
+        if self.history.is_empty():
+            return
+        
+        # Get the index of clicked item
+        index = self.history_list.currentRow()
+        entries = self.history.get_entries(20)
+        
+        if 0 <= index < len(entries):
+            entry = entries[index]
+            
+            # Display in result pane
+            output = "<div style='font-family: Courier New; font-size: 12px;'>"
+            output += f"<p style='margin: 5px 0;'><b>From History:</b></p>"
+            output += f"<p style='margin: 5px 0;'><b>{self.translator.get('input_label')}</b> {entry.input_value}</p>"
+            output += f"<p style='margin: 5px 0; color: #0066cc;'><b>Result:</b> {entry.result_text}</p>"
+            output += f"<p style='margin: 5px 0; font-size: 10px;'>Calculated: {entry.timestamp.strftime('%Y-%m-%d %H:%M:%S')}</p>"
+            output += "</div>"
+            
+            self.result_display.setHtml(output)
     
     def clear_history(self):
         """Clear calculation history."""

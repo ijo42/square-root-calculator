@@ -49,6 +49,16 @@ class Translator:
             'update_check_failed': 'Could not check for updates',
             'no_update': 'You are using the latest version',
             'check_updates': 'Check for Updates',
+            'settings': 'Settings',
+            'theme': 'Theme',
+            'theme_light': 'Light Theme',
+            'theme_dark': 'Dark Theme',
+            'show_exact_precision': 'Show Exact Precision Field',
+            'show_negative_roots': 'Show Negative Roots',
+            'user_manual': 'User Manual',
+            'polar_form': 'Polar form:',
+            'exponential_form': 'Exponential form:',
+            'alternative_forms': 'Alternative Forms:',
         },
         'ru': {
             'app_title': 'Калькулятор квадратного корня',
@@ -92,6 +102,16 @@ class Translator:
             'update_check_failed': 'Не удалось проверить обновления',
             'no_update': 'Вы используете последнюю версию',
             'check_updates': 'Проверить обновления',
+            'settings': 'Настройки',
+            'theme': 'Тема',
+            'theme_light': 'Светлая тема',
+            'theme_dark': 'Тёмная тема',
+            'show_exact_precision': 'Показать поле точного значения',
+            'show_negative_roots': 'Показать отрицательные корни',
+            'user_manual': 'Руководство пользователя',
+            'polar_form': 'Полярная форма:',
+            'exponential_form': 'Экспоненциальная форма:',
+            'alternative_forms': 'Альтернативные формы:',
         }
     }
     
