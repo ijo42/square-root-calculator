@@ -62,7 +62,6 @@ htmlcov/
 *.swp
 
 # Build artifacts
-*.spec
 *.dmg
 *.exe
 *.app
