@@ -15,20 +15,19 @@ jobs:
     - name: Checkout code
       uses: actions/checkout@v4
       
+    - name: Set up uv
+      uses: astral-sh/setup-uv@v3
+      with:
+        enable-cache: true
+        cache-dependency-glob: "pyproject.toml"
+        
     - name: Set up Python
       uses: actions/setup-python@v5
       with:
         python-version: '3.12'
-    
-    - name: Install uv
-      run: curl -LsSf https://astral.sh/uv/install.sh | sh
-      
-    - name: Add uv to PATH
-      run: echo "$HOME/.cargo/bin" >> $GITHUB_PATH
         
     - name: Install dependencies with uv
-      run: |
-        uv sync --dev
+      run: uv sync --dev
         
     - name: Run tests with coverage (headless)
       run: |
@@ -59,20 +58,19 @@ jobs:
     - name: Checkout code
       uses: actions/checkout@v4
       
+    - name: Set up uv
+      uses: astral-sh/setup-uv@v3
+      with:
+        enable-cache: true
+        cache-dependency-glob: "pyproject.toml"
+        
     - name: Set up Python
       uses: actions/setup-python@v5
       with:
         python-version: '3.12'
-    
-    - name: Install uv
-      run: curl -LsSf https://astral.sh/uv/install.sh | sh
-      
-    - name: Add uv to PATH
-      run: echo "$HOME/.cargo/bin" >> $GITHUB_PATH
         
     - name: Install dependencies with uv
-      run: |
-        uv sync --dev
+      run: uv sync --dev
         
     - name: Check code formatting with black
       run: |
@@ -92,20 +90,19 @@ jobs:
     - name: Checkout code
       uses: actions/checkout@v4
       
+    - name: Set up uv
+      uses: astral-sh/setup-uv@v3
+      with:
+        enable-cache: true
+        cache-dependency-glob: "pyproject.toml"
+        
     - name: Set up Python
       uses: actions/setup-python@v5
       with:
         python-version: '3.12'
-    
-    - name: Install uv
-      run: curl -LsSf https://astral.sh/uv/install.sh | sh
-      
-    - name: Add uv to PATH
-      run: echo "$HOME/.cargo/bin" >> $GITHUB_PATH
         
     - name: Install dependencies with uv
-      run: |
-        uv sync --dev
+      run: uv sync --dev
         
     - name: Build Linux executable with PyInstaller
       run: |
@@ -127,24 +124,22 @@ jobs:
     - name: Checkout code
       uses: actions/checkout@v4
       
+    - name: Set up uv
+      uses: astral-sh/setup-uv@v3
+      with:
+        enable-cache: true
+        cache-dependency-glob: "pyproject.toml"
+        
     - name: Set up Python
       uses: actions/setup-python@v5
       with:
         python-version: '3.12'
-    
-    - name: Install uv
-      run: irm https://astral.sh/uv/install.ps1 | iex
-      shell: powershell
       
     - name: Install dependencies with uv
-      run: |
-        uv sync --dev
-      shell: powershell
+      run: uv sync --dev
         
     - name: Build Windows executable with PyInstaller
-      run: |
-        uv run pyinstaller square_root_calculator.spec
-      shell: powershell
+      run: uv run pyinstaller square_root_calculator.spec
         
     - name: Upload Windows executable
       uses: actions/upload-artifact@v4
