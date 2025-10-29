@@ -1,5 +1,7 @@
 # Square Root Calculator
 
+> **English version** | **[Русская версия](README.ru.md)**
+
 A comprehensive, cross-platform square root calculator with support for real numbers, complex numbers, and arbitrary precision calculations.
 
 ![Enhanced Application](https://github.com/user-attachments/assets/1c317290-cf4e-4c9a-8024-8497b292c0fd)

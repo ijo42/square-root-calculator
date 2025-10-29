@@ -1,5 +1,7 @@
 # Usage Examples
 
+> **English version** | **[Русская версия](USAGE_EXAMPLES.ru.md)**
+
 This document provides detailed examples of using the Square Root Calculator.
 
 ## Table of Contents
