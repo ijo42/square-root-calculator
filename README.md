@@ -147,6 +147,66 @@ square-root-calculator/
    - Currently supports English and Russian
    - Easy to extend with additional languages
 
+## Testing
+
+The project includes a comprehensive test suite with 49 test cases covering all core functionality.
+
+### Quick Start
+
+**Linux/macOS:**
+```bash
+./run_tests.sh
+```
+
+**Windows:**
+```cmd
+run_tests.bat
+```
+
+**Cross-platform (Python):**
+```bash
+python run_tests.py
+```
+
+### Test Scripts
+
+- **`run_tests.sh/bat`**: Full test suite with HTML coverage reports
+- **`test_quick.sh/bat`**: Fast test execution without coverage overhead
+- **`run_tests.py`**: Cross-platform Python test runner
+
+### Manual Testing
+
+```bash
+# Install test dependencies
+pip install -e ".[dev]"
+
+# Run all tests
+pytest
+
+# Run with coverage
+pytest --cov=src/square_root_calculator --cov-report=html
+
+# Run specific test file
+pytest tests/test_calculator.py
+
+# View coverage report
+open htmlcov/index.html  # macOS
+xdg-open htmlcov/index.html  # Linux
+start htmlcov/index.html  # Windows
+```
+
+### Test Coverage
+
+Current coverage: **~96%** with 49 test cases
+
+Test files:
+- `test_calculator.py` - Core calculation tests (16 tests)
+- `test_history.py` - History management tests (11 tests)
+- `test_translator.py` - Localization tests (13 tests)
+- `test_settings.py` - Settings management tests (9 tests)
+
+For detailed testing documentation, see [docs/TESTING.md](docs/TESTING.md).
+
 ## Development
 
 ### Setting Up Development Environment
