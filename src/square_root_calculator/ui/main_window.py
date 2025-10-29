@@ -5,7 +5,8 @@ from decimal import Decimal
 from PyQt6.QtWidgets import (
     QApplication, QMainWindow, QWidget, QVBoxLayout, QHBoxLayout,
     QLabel, QLineEdit, QPushButton, QComboBox, QSpinBox, QTextEdit,
-    QGroupBox, QRadioButton, QButtonGroup, QMessageBox, QMenuBar, QMenu
+    QGroupBox, QRadioButton, QButtonGroup, QMessageBox, QMenuBar, QMenu,
+    QSlider, QTabWidget
 )
 from PyQt6.QtCore import Qt
 from PyQt6.QtGui import QAction
@@ -26,8 +27,8 @@ class MainWindow(QMainWindow):
     def init_ui(self):
         """Initialize the user interface."""
         self.setWindowTitle(self.translator.get('app_title'))
-        self.setMinimumWidth(600)
-        self.setMinimumHeight(500)
+        self.setMinimumWidth(650)
+        self.setMinimumHeight(550)
         
         # Create menu bar
         self.create_menu_bar()
@@ -40,58 +41,30 @@ class MainWindow(QMainWindow):
         layout = QVBoxLayout()
         central_widget.setLayout(layout)
         
-        # Language selection
-        lang_layout = QHBoxLayout()
-        lang_label = QLabel()
-        self.lang_label = lang_label
-        lang_layout.addWidget(lang_label)
+        # Mode selection using tabs (more convenient)
+        self.mode_tabs = QTabWidget()
+        layout.addWidget(self.mode_tabs)
         
-        self.language_combo = QComboBox()
-        self.language_combo.addItem('English', 'en')
-        self.language_combo.addItem('Русский', 'ru')
-        self.language_combo.currentIndexChanged.connect(self.change_language)
-        lang_layout.addWidget(self.language_combo)
-        lang_layout.addStretch()
-        layout.addLayout(lang_layout)
+        # Real numbers tab
+        real_tab = QWidget()
+        real_layout = QVBoxLayout()
+        real_tab.setLayout(real_layout)
         
-        # Mode selection group
-        mode_group = QGroupBox()
-        self.mode_group = mode_group
-        mode_layout = QVBoxLayout()
-        
-        self.mode_button_group = QButtonGroup()
-        self.real_mode_radio = QRadioButton()
-        self.complex_mode_radio = QRadioButton()
-        
-        self.real_mode_radio.setChecked(True)
-        self.mode_button_group.addButton(self.real_mode_radio, 0)
-        self.mode_button_group.addButton(self.complex_mode_radio, 1)
-        
-        mode_layout.addWidget(self.real_mode_radio)
-        mode_layout.addWidget(self.complex_mode_radio)
-        mode_group.setLayout(mode_layout)
-        layout.addWidget(mode_group)
-        
-        self.mode_button_group.buttonClicked.connect(self.mode_changed)
-        
-        # Input section for real numbers
-        self.real_input_group = QGroupBox()
-        real_input_layout = QVBoxLayout()
-        
-        real_input_row = QHBoxLayout()
+        real_input_layout = QHBoxLayout()
         self.input_label = QLabel()
-        real_input_row.addWidget(self.input_label)
+        real_input_layout.addWidget(self.input_label)
         self.input_field = QLineEdit()
         self.input_field.setPlaceholderText('0')
-        real_input_row.addWidget(self.input_field)
-        real_input_layout.addLayout(real_input_row)
+        real_input_layout.addWidget(self.input_field)
+        real_layout.addLayout(real_input_layout)
+        real_layout.addStretch()
         
-        self.real_input_group.setLayout(real_input_layout)
-        layout.addWidget(self.real_input_group)
+        self.mode_tabs.addTab(real_tab, '')  # Text will be set in update_ui_text
         
-        # Input section for complex numbers
-        self.complex_input_group = QGroupBox()
-        complex_input_layout = QVBoxLayout()
+        # Complex numbers tab
+        complex_tab = QWidget()
+        complex_layout = QVBoxLayout()
+        complex_tab.setLayout(complex_layout)
         
         real_row = QHBoxLayout()
         self.real_part_label = QLabel()
@@ -99,7 +72,7 @@ class MainWindow(QMainWindow):
         self.real_part_field = QLineEdit()
         self.real_part_field.setPlaceholderText('0')
         real_row.addWidget(self.real_part_field)
-        complex_input_layout.addLayout(real_row)
+        complex_layout.addLayout(real_row)
         
         imag_row = QHBoxLayout()
         self.imag_part_label = QLabel()
@@ -107,29 +80,61 @@ class MainWindow(QMainWindow):
         self.imag_part_field = QLineEdit()
         self.imag_part_field.setPlaceholderText('0')
         imag_row.addWidget(self.imag_part_field)
-        complex_input_layout.addLayout(imag_row)
+        complex_layout.addLayout(imag_row)
+        complex_layout.addStretch()
         
-        self.complex_input_group.setLayout(complex_input_layout)
-        self.complex_input_group.hide()
-        layout.addWidget(self.complex_input_group)
+        self.mode_tabs.addTab(complex_tab, '')  # Text will be set in update_ui_text
         
-        # Precision control
-        precision_layout = QHBoxLayout()
+        # Precision control with slider
+        precision_group = QGroupBox()
+        self.precision_group = precision_group
+        precision_layout = QVBoxLayout()
+        
+        # Precision value display
+        precision_value_layout = QHBoxLayout()
         self.precision_label = QLabel()
-        precision_layout.addWidget(self.precision_label)
+        precision_value_layout.addWidget(self.precision_label)
+        self.precision_value_label = QLabel('50')
+        self.precision_value_label.setStyleSheet("font-weight: bold; font-size: 14px;")
+        precision_value_layout.addWidget(self.precision_value_label)
+        precision_value_layout.addStretch()
+        precision_layout.addLayout(precision_value_layout)
         
+        # Slider for quick adjustment
+        slider_layout = QHBoxLayout()
+        slider_layout.addWidget(QLabel('1'))
+        self.precision_slider = QSlider(Qt.Orientation.Horizontal)
+        self.precision_slider.setMinimum(1)
+        self.precision_slider.setMaximum(200)
+        self.precision_slider.setValue(50)
+        self.precision_slider.setTickPosition(QSlider.TickPosition.TicksBelow)
+        self.precision_slider.setTickInterval(20)
+        self.precision_slider.valueChanged.connect(self.precision_slider_changed)
+        slider_layout.addWidget(self.precision_slider)
+        slider_layout.addWidget(QLabel('200'))
+        precision_layout.addLayout(slider_layout)
+        
+        # SpinBox for precise input
+        spinbox_layout = QHBoxLayout()
+        spinbox_label = QLabel()
+        self.spinbox_label = spinbox_label
+        spinbox_layout.addWidget(spinbox_label)
         self.precision_spinbox = QSpinBox()
         self.precision_spinbox.setMinimum(1)
         self.precision_spinbox.setMaximum(1000)
         self.precision_spinbox.setValue(50)
-        self.precision_spinbox.valueChanged.connect(self.precision_changed)
-        precision_layout.addWidget(self.precision_spinbox)
-        precision_layout.addStretch()
-        layout.addLayout(precision_layout)
+        self.precision_spinbox.valueChanged.connect(self.precision_spinbox_changed)
+        spinbox_layout.addWidget(self.precision_spinbox)
+        spinbox_layout.addStretch()
+        precision_layout.addLayout(spinbox_layout)
+        
+        precision_group.setLayout(precision_layout)
+        layout.addWidget(precision_group)
         
         # Buttons
         button_layout = QHBoxLayout()
         self.calculate_button = QPushButton()
+        self.calculate_button.setStyleSheet("font-size: 14px; padding: 8px;")
         self.calculate_button.clicked.connect(self.calculate)
         button_layout.addWidget(self.calculate_button)
         
@@ -139,14 +144,22 @@ class MainWindow(QMainWindow):
         
         layout.addLayout(button_layout)
         
-        # Result display
+        # Result display with better formatting
         result_group = QGroupBox()
         self.result_group = result_group
         result_layout = QVBoxLayout()
         
         self.result_display = QTextEdit()
         self.result_display.setReadOnly(True)
-        self.result_display.setMaximumHeight(150)
+        self.result_display.setMinimumHeight(120)
+        self.result_display.setStyleSheet("""
+            QTextEdit {
+                font-family: 'Courier New', monospace;
+                font-size: 12px;
+                background-color: #f5f5f5;
+                padding: 10px;
+            }
+        """)
         result_layout.addWidget(self.result_display)
         
         result_group.setLayout(result_layout)
@@ -158,6 +171,20 @@ class MainWindow(QMainWindow):
     def create_menu_bar(self):
         """Create the menu bar."""
         menubar = self.menuBar()
+        
+        # Language menu
+        self.language_menu = menubar.addMenu('Language')
+        
+        self.english_action = QAction('English', self)
+        self.english_action.setCheckable(True)
+        self.english_action.setChecked(True)
+        self.english_action.triggered.connect(lambda: self.change_language_from_menu('en'))
+        self.language_menu.addAction(self.english_action)
+        
+        self.russian_action = QAction('Русский', self)
+        self.russian_action.setCheckable(True)
+        self.russian_action.triggered.connect(lambda: self.change_language_from_menu('ru'))
+        self.language_menu.addAction(self.russian_action)
         
         # Help menu
         self.help_menu = menubar.addMenu('Help')
@@ -173,37 +200,62 @@ class MainWindow(QMainWindow):
     def update_ui_text(self):
         """Update all UI text based on current language."""
         self.setWindowTitle(self.translator.get('app_title'))
-        self.lang_label.setText(self.translator.get('language'))
-        self.mode_group.setTitle(self.translator.get('mode_label'))
-        self.real_mode_radio.setText(self.translator.get('mode_real'))
-        self.complex_mode_radio.setText(self.translator.get('mode_complex'))
+        
+        # Update tab labels
+        self.mode_tabs.setTabText(0, self.translator.get('mode_real'))
+        self.mode_tabs.setTabText(1, self.translator.get('mode_complex'))
+        
+        # Update input labels
         self.input_label.setText(self.translator.get('input_label'))
         self.real_part_label.setText(self.translator.get('real_part_label'))
         self.imag_part_label.setText(self.translator.get('imag_part_label'))
+        
+        # Update precision labels
+        self.precision_group.setTitle(self.translator.get('precision_control'))
         self.precision_label.setText(self.translator.get('precision_label'))
+        self.spinbox_label.setText(self.translator.get('exact_value'))
+        
+        # Update buttons
         self.calculate_button.setText(self.translator.get('calculate_button'))
         self.clear_button.setText(self.translator.get('clear_button'))
+        
+        # Update result group
         self.result_group.setTitle(self.translator.get('result_label'))
+        
+        # Update menu actions
+        self.language_menu.setTitle(self.translator.get('language_menu'))
+        self.help_menu.setTitle(self.translator.get('help'))
         self.about_action.setText(self.translator.get('about'))
         self.help_action.setText(self.translator.get('help'))
     
-    def change_language(self, index):
-        """Handle language change."""
-        language_code = self.language_combo.itemData(index)
+    def change_language_from_menu(self, language_code):
+        """Handle language change from menu."""
         self.translator.set_language(language_code)
+        
+        # Update menu checkmarks
+        self.english_action.setChecked(language_code == 'en')
+        self.russian_action.setChecked(language_code == 'ru')
+        
         self.update_ui_text()
     
-    def mode_changed(self):
-        """Handle mode change between real and complex."""
-        if self.real_mode_radio.isChecked():
-            self.real_input_group.show()
-            self.complex_input_group.hide()
-        else:
-            self.real_input_group.hide()
-            self.complex_input_group.show()
+    def precision_slider_changed(self, value):
+        """Handle precision slider change."""
+        self.precision_value_label.setText(str(value))
+        self.precision_spinbox.blockSignals(True)
+        self.precision_spinbox.setValue(value)
+        self.precision_spinbox.blockSignals(False)
+        try:
+            self.calculator.set_precision(value)
+        except Exception as e:
+            self.show_error(str(e))
     
-    def precision_changed(self, value):
-        """Handle precision change."""
+    def precision_spinbox_changed(self, value):
+        """Handle precision spinbox change."""
+        self.precision_value_label.setText(str(value))
+        if value <= 200:
+            self.precision_slider.blockSignals(True)
+            self.precision_slider.setValue(value)
+            self.precision_slider.blockSignals(False)
         try:
             self.calculator.set_precision(value)
         except Exception as e:
@@ -212,7 +264,8 @@ class MainWindow(QMainWindow):
     def calculate(self):
         """Perform calculation based on current mode."""
         try:
-            if self.real_mode_radio.isChecked():
+            # Check which tab is active
+            if self.mode_tabs.currentIndex() == 0:
                 self.calculate_real()
             else:
                 self.calculate_complex()
@@ -233,7 +286,15 @@ class MainWindow(QMainWindow):
         formatted = self.calculator.format_result(result)
         
         self.result_display.clear()
-        self.result_display.append(f"√({value}) = {formatted}")
+        
+        # Format output with better presentation
+        output = f"<div style='font-family: Courier New; font-size: 12px;'>"
+        output += f"<p style='margin: 5px 0;'><b>{self.translator.get('input_label')}</b> {value}</p>"
+        output += f"<p style='margin: 5px 0;'><b>{self.translator.get('result_label')}</b></p>"
+        output += f"<p style='margin: 5px 0; color: #0066cc; font-size: 13px;'><b>√({value}) = {formatted}</b></p>"
+        output += "</div>"
+        
+        self.result_display.setHtml(output)
     
     def calculate_complex(self):
         """Calculate square root of complex number."""
@@ -247,7 +308,7 @@ class MainWindow(QMainWindow):
         
         self.result_display.clear()
         
-        # Format complex number nicely
+        # Format complex number input nicely
         if imag_str == '0':
             input_str = real_str
         else:
@@ -260,7 +321,14 @@ class MainWindow(QMainWindow):
         else:
             result_str = f"{real_formatted}+{imag_formatted}i"
         
-        self.result_display.append(f"√({input_str}) = {result_str}")
+        # Format output with better presentation
+        output = f"<div style='font-family: Courier New; font-size: 12px;'>"
+        output += f"<p style='margin: 5px 0;'><b>{self.translator.get('input_label')}</b> {input_str}</p>"
+        output += f"<p style='margin: 5px 0;'><b>{self.translator.get('result_label')}</b></p>"
+        output += f"<p style='margin: 5px 0; color: #0066cc; font-size: 13px;'><b>√({input_str}) = {result_str}</b></p>"
+        output += "</div>"
+        
+        self.result_display.setHtml(output)
     
     def clear_fields(self):
         """Clear all input and output fields."""
