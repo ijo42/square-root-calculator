@@ -1,0 +1,28 @@
+[project]
+name = "square-root-calculator"
+version = "0.1.0"
+description = "A comprehensive square root calculator with support for real numbers, complex numbers, and arbitrary precision"
+readme = "README.md"
+requires-python = ">=3.12"
+dependencies = [
+    "pyqt6>=6.10.0",
+]
+authors = [
+    {name = "Square Root Calculator Team"}
+]
+keywords = ["calculator", "square-root", "math", "complex-numbers", "precision"]
+classifiers = [
+    "Development Status :: 4 - Beta",
+    "Intended Audience :: Education",
+    "Intended Audience :: Science/Research",
+    "License :: OSI Approved :: MIT License",
+    "Programming Language :: Python :: 3.12",
+    "Topic :: Scientific/Engineering :: Mathematics",
+]
+
+[project.scripts]
+square-root-calculator = "square_root_calculator.ui.main_window:main"
+
+[build-system]
+requires = ["hatchling"]
+build-backend = "hatchling.build"
