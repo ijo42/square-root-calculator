@@ -19,15 +19,22 @@ jobs:
       uses: actions/setup-python@v5
       with:
         python-version: '3.12'
+    
+    - name: Install uv
+      run: curl -LsSf https://astral.sh/uv/install.sh | sh
+      
+    - name: Add uv to PATH
+      run: echo "$HOME/.cargo/bin" >> $GITHUB_PATH
         
-    - name: Install dependencies
+    - name: Install dependencies with uv
       run: |
-        python -m pip install --upgrade pip
-        pip install -e ".[dev]"
+        uv sync --dev
         
-    - name: Run tests with coverage
+    - name: Run tests with coverage (headless)
       run: |
-        pytest --cov=src/square_root_calculator --cov-report=html --cov-report=xml --cov-report=term
+        uv run pytest --cov=src/square_root_calculator --cov-report=html --cov-report=xml --cov-report=term -p no:qt
+      env:
+        QT_QPA_PLATFORM: offscreen
         
     - name: Upload coverage reports
       uses: codecov/codecov-action@v4
@@ -56,17 +63,132 @@ jobs:
       uses: actions/setup-python@v5
       with:
         python-version: '3.12'
+    
+    - name: Install uv
+      run: curl -LsSf https://astral.sh/uv/install.sh | sh
+      
+    - name: Add uv to PATH
+      run: echo "$HOME/.cargo/bin" >> $GITHUB_PATH
         
-    - name: Install dependencies
+    - name: Install dependencies with uv
       run: |
-        python -m pip install --upgrade pip
-        pip install flake8 black
+        uv sync --dev
         
     - name: Check code formatting with black
       run: |
-        black --check src/ tests/ || true
+        uv run black --check src/ tests/ || true
         
     - name: Lint with flake8
       run: |
-        flake8 src/ tests/ --count --select=E9,F63,F7,F82 --show-source --statistics || true
-        flake8 src/ tests/ --count --exit-zero --max-complexity=10 --max-line-length=127 --statistics || true
+        uv run flake8 src/ tests/ --count --select=E9,F63,F7,F82 --show-source --statistics || true
+        uv run flake8 src/ tests/ --count --exit-zero --max-complexity=10 --max-line-length=127 --statistics || true
+
+  build-linux:
+    name: Build Linux ELF
+    runs-on: ubuntu-latest
+    if: github.event_name == 'pull_request'
+    
+    steps:
+    - name: Checkout code
+      uses: actions/checkout@v4
+      
+    - name: Set up Python
+      uses: actions/setup-python@v5
+      with:
+        python-version: '3.12'
+    
+    - name: Install uv
+      run: curl -LsSf https://astral.sh/uv/install.sh | sh
+      
+    - name: Add uv to PATH
+      run: echo "$HOME/.cargo/bin" >> $GITHUB_PATH
+        
+    - name: Install dependencies with uv
+      run: |
+        uv sync --dev
+        
+    - name: Build Linux executable with PyInstaller
+      run: |
+        uv run pyinstaller --name SquareRootCalculator \
+          --onefile \
+          --windowed \
+          --icon=NONE \
+          --hidden-import=PyQt6 \
+          --hidden-import=PyQt6.QtCore \
+          --hidden-import=PyQt6.QtGui \
+          --hidden-import=PyQt6.QtWidgets \
+          --hidden-import=qt_material \
+          --hidden-import=square_root_calculator \
+          --hidden-import=square_root_calculator.core \
+          --hidden-import=square_root_calculator.core.calculator \
+          --hidden-import=square_root_calculator.core.history \
+          --hidden-import=square_root_calculator.core.settings \
+          --hidden-import=square_root_calculator.core.update_checker \
+          --hidden-import=square_root_calculator.ui \
+          --hidden-import=square_root_calculator.ui.main_window \
+          --hidden-import=square_root_calculator.locales \
+          --hidden-import=square_root_calculator.locales.translator \
+          --add-data "src/square_root_calculator:square_root_calculator" \
+          main.py
+        
+    - name: Upload Linux executable
+      uses: actions/upload-artifact@v4
+      with:
+        name: SquareRootCalculator-Linux-ELF
+        path: dist/SquareRootCalculator
+        retention-days: 30
+
+  build-windows:
+    name: Build Windows EXE
+    runs-on: windows-latest
+    if: github.event_name == 'pull_request'
+    
+    steps:
+    - name: Checkout code
+      uses: actions/checkout@v4
+      
+    - name: Set up Python
+      uses: actions/setup-python@v5
+      with:
+        python-version: '3.12'
+    
+    - name: Install uv
+      run: irm https://astral.sh/uv/install.ps1 | iex
+      shell: powershell
+      
+    - name: Install dependencies with uv
+      run: |
+        uv sync --dev
+      shell: powershell
+        
+    - name: Build Windows executable with PyInstaller
+      run: |
+        uv run pyinstaller --name SquareRootCalculator `
+          --onefile `
+          --windowed `
+          --icon=NONE `
+          --hidden-import=PyQt6 `
+          --hidden-import=PyQt6.QtCore `
+          --hidden-import=PyQt6.QtGui `
+          --hidden-import=PyQt6.QtWidgets `
+          --hidden-import=qt_material `
+          --hidden-import=square_root_calculator `
+          --hidden-import=square_root_calculator.core `
+          --hidden-import=square_root_calculator.core.calculator `
+          --hidden-import=square_root_calculator.core.history `
+          --hidden-import=square_root_calculator.core.settings `
+          --hidden-import=square_root_calculator.core.update_checker `
+          --hidden-import=square_root_calculator.ui `
+          --hidden-import=square_root_calculator.ui.main_window `
+          --hidden-import=square_root_calculator.locales `
+          --hidden-import=square_root_calculator.locales.translator `
+          --add-data "src/square_root_calculator;square_root_calculator" `
+          main.py
+      shell: powershell
+        
+    - name: Upload Windows executable
+      uses: actions/upload-artifact@v4
+      with:
+        name: SquareRootCalculator-Windows-EXE
+        path: dist/SquareRootCalculator.exe
+        retention-days: 30
