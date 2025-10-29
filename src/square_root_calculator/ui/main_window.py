@@ -6,13 +6,31 @@ from PyQt6.QtWidgets import (
     QApplication, QMainWindow, QWidget, QVBoxLayout, QHBoxLayout,
     QLabel, QLineEdit, QPushButton, QComboBox, QSpinBox, QTextEdit,
     QGroupBox, QRadioButton, QButtonGroup, QMessageBox, QMenuBar, QMenu,
-    QSlider, QTabWidget
+    QSlider, QTabWidget, QListWidget, QSplitter
 )
-from PyQt6.QtCore import Qt
+from PyQt6.QtCore import Qt, QThread, pyqtSignal
 from PyQt6.QtGui import QAction
 
-from ..core.calculator import SquareRootCalculator, InvalidInputError, CalculatorError
+from ..core.calculator import SquareRootCalculator, InvalidInputError, CalculatorError, CalculationResult
+from ..core.history import HistoryManager
+from ..core.update_checker import UpdateChecker
 from ..locales.translator import Translator
+from .. import __version__
+
+
+class UpdateCheckThread(QThread):
+    """Thread for checking updates without blocking UI."""
+    
+    update_checked = pyqtSignal(bool, str, str)  # has_update, version, error
+    
+    def __init__(self, checker):
+        super().__init__()
+        self.checker = checker
+    
+    def run(self):
+        """Run update check in background."""
+        has_update, version, error = self.checker.check_for_updates()
+        self.update_checked.emit(has_update, version or "", error or "")
 
 
 class MainWindow(QMainWindow):
@@ -22,13 +40,18 @@ class MainWindow(QMainWindow):
         super().__init__()
         self.calculator = SquareRootCalculator()
         self.translator = Translator('en')
+        self.history = HistoryManager()
+        self.update_checker = UpdateChecker('ijo42', 'square-root-calculator', __version__)
         self.init_ui()
+        
+        # Check for updates on startup (non-blocking)
+        self.check_for_updates_async()
     
     def init_ui(self):
         """Initialize the user interface."""
         self.setWindowTitle(self.translator.get('app_title'))
-        self.setMinimumWidth(650)
-        self.setMinimumHeight(550)
+        self.setMinimumWidth(800)
+        self.setMinimumHeight(600)
         
         # Create menu bar
         self.create_menu_bar()
@@ -144,6 +167,10 @@ class MainWindow(QMainWindow):
         
         layout.addLayout(button_layout)
         
+        # Splitter for result and history
+        splitter = QSplitter(Qt.Orientation.Horizontal)
+        layout.addWidget(splitter)
+        
         # Result display with better formatting
         result_group = QGroupBox()
         self.result_group = result_group
@@ -151,7 +178,7 @@ class MainWindow(QMainWindow):
         
         self.result_display = QTextEdit()
         self.result_display.setReadOnly(True)
-        self.result_display.setMinimumHeight(120)
+        self.result_display.setMinimumHeight(150)
         self.result_display.setStyleSheet("""
             QTextEdit {
                 font-family: 'Courier New', monospace;
@@ -163,7 +190,32 @@ class MainWindow(QMainWindow):
         result_layout.addWidget(self.result_display)
         
         result_group.setLayout(result_layout)
-        layout.addWidget(result_group)
+        splitter.addWidget(result_group)
+        
+        # History panel
+        history_group = QGroupBox()
+        self.history_group = history_group
+        history_layout = QVBoxLayout()
+        
+        self.history_list = QListWidget()
+        self.history_list.setStyleSheet("""
+            QListWidget {
+                font-family: 'Courier New', monospace;
+                font-size: 11px;
+            }
+        """)
+        self.history_list.itemClicked.connect(self.history_item_clicked)
+        history_layout.addWidget(self.history_list)
+        
+        self.clear_history_button = QPushButton()
+        self.clear_history_button.clicked.connect(self.clear_history)
+        history_layout.addWidget(self.clear_history_button)
+        
+        history_group.setLayout(history_layout)
+        splitter.addWidget(history_group)
+        
+        # Set initial splitter sizes (60% result, 40% history)
+        splitter.setSizes([480, 320])
         
         # Update all text
         self.update_ui_text()
@@ -188,6 +240,12 @@ class MainWindow(QMainWindow):
         
         # Help menu
         self.help_menu = menubar.addMenu('Help')
+        
+        self.check_updates_action = QAction('Check for Updates', self)
+        self.check_updates_action.triggered.connect(self.check_for_updates_manual)
+        self.help_menu.addAction(self.check_updates_action)
+        
+        self.help_menu.addSeparator()
         
         self.about_action = QAction('About', self)
         self.about_action.triggered.connect(self.show_about)
@@ -218,13 +276,16 @@ class MainWindow(QMainWindow):
         # Update buttons
         self.calculate_button.setText(self.translator.get('calculate_button'))
         self.clear_button.setText(self.translator.get('clear_button'))
+        self.clear_history_button.setText(self.translator.get('clear_history_button'))
         
-        # Update result group
+        # Update result and history groups
         self.result_group.setTitle(self.translator.get('result_label'))
+        self.history_group.setTitle(self.translator.get('history_label'))
         
         # Update menu actions
         self.language_menu.setTitle(self.translator.get('language_menu'))
         self.help_menu.setTitle(self.translator.get('help'))
+        self.check_updates_action.setText(self.translator.get('check_updates'))
         self.about_action.setText(self.translator.get('about'))
         self.help_action.setText(self.translator.get('help'))
     
@@ -266,9 +327,23 @@ class MainWindow(QMainWindow):
         try:
             # Check which tab is active
             if self.mode_tabs.currentIndex() == 0:
-                self.calculate_real()
+                # Real mode
+                value = self.input_field.text().strip()
+                if not value:
+                    raise InvalidInputError(self.translator.get('invalid_input'))
+                result = self.calculator.calculate(value)
             else:
-                self.calculate_complex()
+                # Complex mode
+                real_str = self.real_part_field.text().strip() or '0'
+                imag_str = self.imag_part_field.text().strip() or '0'
+                result = self.calculator.calculate(None, real_str, imag_str)
+            
+            # Display unified result
+            self.display_result(result)
+            
+            # Add to history
+            self.add_to_history(result)
+            
         except InvalidInputError as e:
             self.show_error(str(e))
         except CalculatorError as e:
@@ -276,59 +351,75 @@ class MainWindow(QMainWindow):
         except Exception as e:
             self.show_error(self.translator.get('calculation_error').format(str(e)))
     
-    def calculate_real(self):
-        """Calculate square root of real number."""
-        value = self.input_field.text().strip()
-        if not value:
-            raise InvalidInputError(self.translator.get('invalid_input'))
-        
-        result = self.calculator.sqrt_real(value)
-        formatted = self.calculator.format_result(result)
-        
+    def display_result(self, result: CalculationResult):
+        """Display calculation result in unified format."""
         self.result_display.clear()
         
-        # Format output with better presentation
-        output = f"<div style='font-family: Courier New; font-size: 12px;'>"
-        output += f"<p style='margin: 5px 0;'><b>{self.translator.get('input_label')}</b> {value}</p>"
-        output += f"<p style='margin: 5px 0;'><b>{self.translator.get('result_label')}</b></p>"
-        output += f"<p style='margin: 5px 0; color: #0066cc; font-size: 13px;'><b>√({value}) = {formatted}</b></p>"
+        # Build HTML output
+        output = "<div style='font-family: Courier New; font-size: 12px;'>"
+        
+        # Input
+        output += f"<p style='margin: 5px 0;'><b>{self.translator.get('input_label')}</b> {result.input_value}</p>"
+        
+        # Roots section
+        output += f"<p style='margin: 10px 0 5px 0;'><b>{self.translator.get('roots_label')}</b></p>"
+        
+        formatted_roots = result.get_formatted_roots()
+        if len(formatted_roots) >= 2:
+            output += f"<p style='margin: 3px 0 3px 20px; color: #0066cc;'><b>{self.translator.get('root_positive')}</b> +√({result.input_value}) = {formatted_roots[0]}</p>"
+            output += f"<p style='margin: 3px 0 3px 20px; color: #0066cc;'><b>{self.translator.get('root_negative')}</b> -√({result.input_value}) = {formatted_roots[1]}</p>"
+        
+        # Representations (for real numbers only)
+        if not result.is_complex:
+            representations = result.get_representations()
+            if representations:
+                output += f"<p style='margin: 10px 0 5px 0;'><b>{self.translator.get('representations_label')}</b></p>"
+                
+                if 'decimal' in representations:
+                    output += f"<p style='margin: 3px 0 3px 20px;'><b>{self.translator.get('decimal_repr')}</b> {representations['decimal']}</p>"
+                
+                if 'scientific' in representations:
+                    output += f"<p style='margin: 3px 0 3px 20px;'><b>{self.translator.get('scientific_repr')}</b> {representations['scientific']}</p>"
+                
+                if 'fraction' in representations:
+                    output += f"<p style='margin: 3px 0 3px 20px;'><b>{self.translator.get('fraction_repr')}</b> {representations['fraction']}</p>"
+        
         output += "</div>"
         
         self.result_display.setHtml(output)
     
-    def calculate_complex(self):
-        """Calculate square root of complex number."""
-        real_str = self.real_part_field.text().strip() or '0'
-        imag_str = self.imag_part_field.text().strip() or '0'
-        
-        real_part, imag_part = self.calculator.sqrt_complex(real_str, imag_str)
-        
-        real_formatted = self.calculator.format_result(real_part)
-        imag_formatted = self.calculator.format_result(imag_part)
-        
-        self.result_display.clear()
-        
-        # Format complex number input nicely
-        if imag_str == '0':
-            input_str = real_str
+    def add_to_history(self, result: CalculationResult):
+        """Add calculation to history."""
+        formatted_roots = result.get_formatted_roots()
+        if len(formatted_roots) >= 1:
+            result_text = formatted_roots[0]  # Show positive root in history
         else:
-            imag_display = imag_str if imag_str.startswith('-') else f"+{imag_str}"
-            input_str = f"{real_str}{imag_display}i"
+            result_text = "?"
         
-        # Format result
-        if imag_part < 0:
-            result_str = f"{real_formatted}{imag_formatted}i"
+        self.history.add_entry(result.input_value, result_text)
+        self.update_history_display()
+    
+    def update_history_display(self):
+        """Update history list widget."""
+        self.history_list.clear()
+        
+        if self.history.is_empty():
+            self.history_list.addItem(self.translator.get('history_empty'))
         else:
-            result_str = f"{real_formatted}+{imag_formatted}i"
-        
-        # Format output with better presentation
-        output = f"<div style='font-family: Courier New; font-size: 12px;'>"
-        output += f"<p style='margin: 5px 0;'><b>{self.translator.get('input_label')}</b> {input_str}</p>"
-        output += f"<p style='margin: 5px 0;'><b>{self.translator.get('result_label')}</b></p>"
-        output += f"<p style='margin: 5px 0; color: #0066cc; font-size: 13px;'><b>√({input_str}) = {result_str}</b></p>"
-        output += "</div>"
-        
-        self.result_display.setHtml(output)
+            entries = self.history.get_entries(20)  # Show last 20
+            for entry in entries:
+                item_text = f"√({entry.input_value}) = {entry.result_text[:30]}..."
+                self.history_list.addItem(item_text)
+    
+    def history_item_clicked(self, item):
+        """Handle click on history item."""
+        # Could potentially restore the calculation
+        pass
+    
+    def clear_history(self):
+        """Clear calculation history."""
+        self.history.clear()
+        self.update_history_display()
     
     def clear_fields(self):
         """Clear all input and output fields."""
@@ -336,6 +427,37 @@ class MainWindow(QMainWindow):
         self.real_part_field.clear()
         self.imag_part_field.clear()
         self.result_display.clear()
+    
+    def check_for_updates_async(self):
+        """Check for updates in background thread."""
+        self.update_thread = UpdateCheckThread(self.update_checker)
+        self.update_thread.update_checked.connect(self.on_update_checked)
+        self.update_thread.start()
+    
+    def check_for_updates_manual(self):
+        """Manually check for updates (user initiated)."""
+        self.check_for_updates_async()
+    
+    def on_update_checked(self, has_update: bool, version: str, error: str):
+        """Handle update check result."""
+        if error:
+            # Only show error if manually checked
+            return
+        
+        if has_update and version:
+            message = self.translator.get('update_message').format(version, __version__)
+            QMessageBox.information(
+                self,
+                self.translator.get('update_available'),
+                message
+            )
+        elif hasattr(self, '_manual_check'):
+            # Only show "no update" if manually checked
+            QMessageBox.information(
+                self,
+                self.translator.get('check_updates'),
+                self.translator.get('no_update')
+            )
     
     def show_error(self, message):
         """Display error message."""
