@@ -1,4 +1,7 @@
-"""Square root calculator with support for real, complex, and high-precision numbers."""
+"""Square root calculator with support for real, complex, and high-precision numbers.
+
+Калькулятор квадратного корня с поддержкой действительных, комплексных чисел и высокой точности.
+"""
 
 import decimal
 from decimal import Decimal, getcontext
@@ -6,28 +9,42 @@ from typing import Union, Dict, List, Tuple
 
 
 class CalculatorError(Exception):
-    """Base exception for calculator errors."""
+    """Base exception for calculator errors.
+    
+    Базовое исключение для ошибок калькулятора.
+    """
     pass
 
 
 class InvalidInputError(CalculatorError):
-    """Exception raised for invalid input."""
+    """Exception raised for invalid input.
+    
+    Исключение, возникающее при неверных входных данных.
+    """
     pass
 
 
 class CalculationResult:
-    """Container for calculation results with multiple representations."""
+    """Container for calculation results with multiple representations.
+    
+    Контейнер для результатов вычислений с множественными представлениями.
+    """
     
     def __init__(self, input_value: str, roots: List[Tuple[Decimal, Decimal]], 
                  is_complex: bool, precision: int):
-        """
-        Initialize calculation result.
+        """Initialize calculation result.
+        
+        Инициализировать результат вычисления.
         
         Args:
             input_value: Original input as string
+                        Исходное входное значение в виде строки
             roots: List of (real, imaginary) tuples for each root
+                  Список кортежей (действительная, мнимая) для каждого корня
             is_complex: Whether this is a complex calculation
+                       Является ли это комплексным вычислением
             precision: Precision used for calculation
+                      Точность, используемая для вычисления
         """
         self.input_value = input_value
         self.roots = roots
@@ -35,7 +52,18 @@ class CalculationResult:
         self.precision = precision
     
     def get_formatted_roots(self, max_digits: int = None) -> List[str]:
-        """Get formatted string representations of all roots."""
+        """Get formatted string representations of all roots.
+        
+        Получить форматированные строковые представления всех корней.
+        
+        Args:
+            max_digits: Maximum number of digits to display
+                       Максимальное количество отображаемых цифр
+        
+        Returns:
+            List of formatted root strings
+            Список форматированных строк корней
+        """
         formatted = []
         for real, imag in self.roots:
             if max_digits is None:
@@ -53,7 +81,20 @@ class CalculationResult:
         return formatted
     
     def _format_decimal(self, value: Decimal, max_digits: int) -> str:
-        """Format a single decimal value."""
+        """Format a single decimal value.
+        
+        Форматировать одно десятичное значение.
+        
+        Args:
+            value: Decimal value to format
+                  Десятичное значение для форматирования
+            max_digits: Maximum digits after decimal point
+                       Максимум цифр после десятичной точки
+        
+        Returns:
+            Formatted string
+            Форматированная строка
+        """
         result = str(value)
         
         if 'E' in result.upper():
@@ -68,7 +109,14 @@ class CalculationResult:
         return result
     
     def get_representations(self) -> Dict[str, str]:
-        """Get various representations of the result."""
+        """Get various representations of the result.
+        
+        Получить различные представления результата.
+        
+        Returns:
+            Dictionary with different representations (decimal, scientific, fraction, polar, exponential)
+            Словарь с различными представлениями (десятичное, научное, дробное, полярное, экспоненциальное)
+        """
         representations = {}
         
         if not self.is_complex and len(self.roots) > 0:
@@ -118,24 +166,35 @@ class CalculationResult:
 
 
 class SquareRootCalculator:
-    """Calculator for computing square roots with configurable precision."""
+    """Calculator for computing square roots with configurable precision.
+    
+    Калькулятор для вычисления квадратных корней с настраиваемой точностью.
+    """
     
     def __init__(self, precision: int = 50):
-        """
-        Initialize calculator with specified precision.
+        """Initialize calculator with specified precision.
+        
+        Инициализировать калькулятор с заданной точностью.
         
         Args:
             precision: Number of decimal places for precision (default: 50)
+                      Количество десятичных знаков для точности (по умолчанию: 50)
         """
         self.precision = precision
         getcontext().prec = precision
     
     def set_precision(self, precision: int):
-        """
-        Set the precision for calculations.
+        """Set the precision for calculations.
+        
+        Установить точность для вычислений.
         
         Args:
             precision: Number of decimal places
+                      Количество десятичных знаков
+        
+        Raises:
+            InvalidInputError: If precision is less than 1
+                              Если точность меньше 1
         """
         if precision < 1:
             raise InvalidInputError("Precision must be at least 1")
@@ -145,16 +204,21 @@ class SquareRootCalculator:
     def calculate(self, value: Union[int, float, str, Decimal], 
                   real_part: Union[int, float, str] = None,
                   imag_part: Union[int, float, str] = None) -> CalculationResult:
-        """
-        Calculate square root(s) and return all roots with multiple representations.
+        """Calculate square root(s) and return all roots with multiple representations.
+        
+        Вычислить квадратный корень(и) и вернуть все корни с множественными представлениями.
         
         Args:
             value: Value for real mode
+                  Значение для режима действительных чисел
             real_part: Real part for complex mode
+                      Действительная часть для режима комплексных чисел
             imag_part: Imaginary part for complex mode
+                      Мнимая часть для режима комплексных чисел
             
         Returns:
             CalculationResult with all roots and representations
+            CalculationResult со всеми корнями и представлениями
         """
         if real_part is not None or imag_part is not None:
             # Complex mode
@@ -188,7 +252,20 @@ class SquareRootCalculator:
     
     def _format_complex_input(self, real: Union[int, float, str], 
                               imag: Union[int, float, str]) -> str:
-        """Format complex input for display."""
+        """Format complex input for display.
+        
+        Форматировать комплексный ввод для отображения.
+        
+        Args:
+            real: Real part
+                 Действительная часть
+            imag: Imaginary part
+                 Мнимая часть
+        
+        Returns:
+            Formatted string (e.g., "3+4i" or "3-4i")
+            Форматированная строка (напр., "3+4i" или "3-4i")
+        """
         real_str = str(real)
         imag_str = str(imag)
         
@@ -201,17 +278,21 @@ class SquareRootCalculator:
             return f"{real_str}+{imag_str}i"
     
     def sqrt_real(self, value: Union[int, float, str, Decimal]) -> Decimal:
-        """
-        Calculate square root of a real number.
+        """Calculate square root of a real number.
+        
+        Вычислить квадратный корень действительного числа.
         
         Args:
             value: The number to calculate square root of
+                  Число для вычисления квадратного корня
             
         Returns:
             Square root as Decimal
+            Квадратный корень как Decimal
             
         Raises:
             InvalidInputError: If input is invalid or negative
+                              Если ввод некорректен или отрицателен
         """
         try:
             num = Decimal(str(value))
@@ -224,18 +305,23 @@ class SquareRootCalculator:
         return num.sqrt()
     
     def sqrt_complex(self, real: Union[int, float, str], imag: Union[int, float, str] = 0) -> tuple[Decimal, Decimal]:
-        """
-        Calculate square root of a complex number.
+        """Calculate square root of a complex number.
+        
+        Вычислить квадратный корень комплексного числа.
         
         Args:
             real: Real part of the complex number
+                 Действительная часть комплексного числа
             imag: Imaginary part of the complex number
+                 Мнимая часть комплексного числа
             
         Returns:
             Tuple of (real_part, imaginary_part) of the result
+            Кортеж (действительная_часть, мнимая_часть) результата
             
         Raises:
             InvalidInputError: If input is invalid
+                              Если ввод некорректен
         """
         try:
             a = Decimal(str(real))
@@ -259,15 +345,19 @@ class SquareRootCalculator:
         return real_part, imag_part
     
     def format_result(self, value: Decimal, max_digits: int = None) -> str:
-        """
-        Format a decimal result for display.
+        """Format a decimal result for display.
+        
+        Форматировать десятичный результат для отображения.
         
         Args:
             value: The decimal value to format
+                  Десятичное значение для форматирования
             max_digits: Maximum number of digits to display (None for all)
+                       Максимальное количество отображаемых цифр (None для всех)
             
         Returns:
             Formatted string representation
+            Форматированное строковое представление
         """
         if max_digits is None:
             max_digits = self.precision

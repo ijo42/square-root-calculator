@@ -1,4 +1,7 @@
-"""Main GUI window for the Square Root Calculator."""
+"""Main GUI window for the Square Root Calculator.
+
+Главное окно GUI для Калькулятора квадратного корня.
+"""
 
 import sys
 import webbrowser
@@ -27,7 +30,10 @@ from .. import __version__
 
 
 class UpdateCheckThread(QThread):
-    """Thread for checking updates without blocking UI."""
+    """Thread for checking updates without blocking UI.
+    
+    Поток для проверки обновлений без блокировки пользовательского интерфейса.
+    """
     
     update_checked = pyqtSignal(bool, str, str)  # has_update, version, error
     
@@ -36,13 +42,19 @@ class UpdateCheckThread(QThread):
         self.checker = checker
     
     def run(self):
-        """Run update check in background."""
+        """Run update check in background.
+        
+        Запустить проверку обновлений в фоновом режиме.
+        """
         has_update, version, error = self.checker.check_for_updates()
         self.update_checked.emit(has_update, version or "", error or "")
 
 
 class MainWindow(QMainWindow):
-    """Main application window."""
+    """Main application window.
+    
+    Главное окно приложения.
+    """
     
     def __init__(self):
         super().__init__()
@@ -66,7 +78,10 @@ class MainWindow(QMainWindow):
         self.check_for_updates_async()
     
     def init_ui(self):
-        """Initialize the user interface."""
+        """Initialize the user interface.
+        
+        Инициализировать пользовательский интерфейс.
+        """
         self.setWindowTitle(self.translator.get('app_title'))
         self.setMinimumWidth(800)
         self.setMinimumHeight(600)

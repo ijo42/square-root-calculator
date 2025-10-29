@@ -1,10 +1,16 @@
-"""Localization system for multilingual support."""
+"""Localization system for multilingual support.
+
+Система локализации для поддержки нескольких языков.
+"""
 
 from typing import Dict
 
 
 class Translator:
-    """Simple translation system supporting multiple languages."""
+    """Simple translation system supporting multiple languages.
+    
+    Простая система перевода с поддержкой нескольких языков.
+    """
     
     TRANSLATIONS: Dict[str, Dict[str, str]] = {
         'en': {
@@ -116,33 +122,52 @@ class Translator:
     }
     
     def __init__(self, language: str = 'en'):
-        """
-        Initialize translator with specified language.
+        """Initialize translator with specified language.
+        
+        Инициализировать переводчик с указанным языком.
         
         Args:
             language: Language code ('en' or 'ru')
+                     Код языка ('en' или 'ru')
         """
         self.language = language if language in self.TRANSLATIONS else 'en'
     
     def set_language(self, language: str):
-        """Set the current language."""
+        """Set the current language.
+        
+        Установить текущий язык.
+        
+        Args:
+            language: Language code
+                     Код языка
+        """
         if language in self.TRANSLATIONS:
             self.language = language
     
     def get(self, key: str) -> str:
-        """
-        Get translated string for the current language.
+        """Get translated string for the current language.
+        
+        Получить переведенную строку для текущего языка.
         
         Args:
             key: Translation key
+                Ключ перевода
             
         Returns:
             Translated string or key if not found
+            Переведенная строка или ключ, если не найден
         """
         return self.TRANSLATIONS.get(self.language, {}).get(key, key)
     
     def get_available_languages(self) -> Dict[str, str]:
-        """Get list of available languages."""
+        """Get list of available languages.
+        
+        Получить список доступных языков.
+        
+        Returns:
+            Dictionary mapping language codes to names
+            Словарь, сопоставляющий коды языков с названиями
+        """
         return {
             'en': self.TRANSLATIONS['en']['english'],
             'ru': self.TRANSLATIONS['ru']['russian']
