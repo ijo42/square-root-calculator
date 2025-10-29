@@ -1,19 +1,27 @@
 #!/usr/bin/env python3
 """
-Cross-platform test runner script
-Runs pytest with coverage and generates HTML reports
+Скрипт запуска тестов с использованием uv (кроссплатформенный).
+Cross-platform test runner script using uv package manager.
+
+Запускает pytest с покрытием кода и генерирует HTML отчёты.
+Runs pytest with coverage and generates HTML reports.
 """
 
 import os
 import sys
 import subprocess
+import shutil
 from pathlib import Path
 
 
 def main():
-    """Run tests with coverage."""
+    """
+    Запустить тесты с покрытием кода.
+    Run tests with coverage.
+    """
     print("=" * 50)
     print("Square Root Calculator Test Suite")
+    print("Набор тестов калькулятора квадратных корней")
     print("=" * 50)
     print()
     
@@ -21,41 +29,46 @@ def main():
     project_root = Path(__file__).parent
     os.chdir(project_root)
     
-    # Check if running in virtual environment
-    in_venv = hasattr(sys, 'real_prefix') or (
-        hasattr(sys, 'base_prefix') and sys.base_prefix != sys.prefix
-    )
-    
-    if not in_venv:
-        print("⚠️  Warning: Not running in a virtual environment")
-        print("   Consider activating venv first:")
-        print("   Linux/macOS: source .venv/bin/activate")
-        print("   Windows: .venv\\Scripts\\activate")
+    # Check if uv is installed
+    if not shutil.which("uv"):
+        print("✗ uv не установлен / uv is not installed")
         print()
+        print("Установите uv / Install uv:")
+        print("  curl -LsSf https://astral.sh/uv/install.sh | sh  (Linux/macOS)")
+        print("  powershell -c \"irm https://astral.sh/uv/install.ps1 | iex\"  (Windows)")
+        print()
+        print("Или используйте / Or use:")
+        print("  pip install uv")
+        return 1
     
-    # Install dependencies
-    print("Installing dependencies...")
+    print("✓ uv найден / uv found")
+    print()
+    
+    # Sync dependencies with uv
+    print("Синхронизация зависимостей с uv...")
+    print("Syncing dependencies with uv...")
     try:
         subprocess.run(
-            [sys.executable, "-m", "pip", "install", "-e", ".[dev]"],
+            ["uv", "sync", "--dev"],
             check=True,
             stdout=subprocess.DEVNULL,
             stderr=subprocess.DEVNULL
         )
-        print("✓ Dependencies installed")
+        print("✓ Зависимости установлены / Dependencies installed")
     except subprocess.CalledProcessError:
-        print("✗ Failed to install dependencies")
+        print("✗ Не удалось установить зависимости / Failed to install dependencies")
         return 1
     
     print()
+    print("Запуск тестов с покрытием...")
     print("Running tests with coverage...")
     print()
     
-    # Run pytest
+    # Run pytest via uv
     try:
         result = subprocess.run(
             [
-                sys.executable, "-m", "pytest",
+                "uv", "run", "pytest",
                 "--verbose",
                 "--cov=src/square_root_calculator",
                 "--cov-report=html",
@@ -71,9 +84,9 @@ def main():
     print()
     print("=" * 50)
     if test_passed:
-        print("✓ All tests passed!")
+        print("✓ Все тесты пройдены! / All tests passed!")
     else:
-        print("✗ Some tests failed")
+        print("✗ Некоторые тесты не прошли / Some tests failed")
     print("=" * 50)
     print()
     
@@ -81,13 +94,16 @@ def main():
     htmlcov_dir = project_root / "htmlcov"
     if htmlcov_dir.exists():
         index_file = htmlcov_dir / "index.html"
+        print("HTML отчёт о покрытии создан:")
         print("HTML coverage report generated:")
         print(f"  file://{index_file.absolute()}")
         print()
+        print("Для просмотра откройте:")
         print("To view the report, open:")
         print(f"  {index_file.relative_to(project_root)}")
     
     print()
+    print("XML отчёт о покрытии: coverage.xml")
     print("XML coverage report: coverage.xml")
     print()
     
