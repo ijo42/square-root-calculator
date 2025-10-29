@@ -167,29 +167,28 @@ run_tests.bat
 
 **Cross-platform (Python):**
 ```bash
-python run_tests.py
+uv run python run_tests.py
 ```
 
 ### Test Scripts
 
-- **`run_tests.sh/bat`**: Full test suite with HTML coverage reports
-- **`test_quick.sh/bat`**: Fast test execution without coverage overhead
-- **`run_tests.py`**: Cross-platform Python test runner
+- **`run_tests.sh/bat`**: Full test suite with HTML coverage reports using uv
+- **`run_tests.py`**: Cross-platform Python test runner with uv
 
 ### Manual Testing
 
 ```bash
-# Install test dependencies
-pip install -e ".[dev]"
+# Sync dependencies with uv
+uv sync --dev
 
 # Run all tests
-pytest
+uv run pytest
 
 # Run with coverage
-pytest --cov=src/square_root_calculator --cov-report=html
+uv run pytest --cov=src/square_root_calculator --cov-report=html
 
 # Run specific test file
-pytest tests/test_calculator.py
+uv run pytest tests/test_calculator.py
 
 # View coverage report
 open htmlcov/index.html  # macOS
@@ -214,14 +213,18 @@ For detailed testing documentation, see [docs/TESTING.md](docs/TESTING.md).
 ### Setting Up Development Environment
 
 ```bash
-# Install uv if not already installed
-pip install uv
+# Install uv if not already installed (choose one method)
+curl -LsSf https://astral.sh/uv/install.sh | sh  # Linux/macOS
+powershell -c "irm https://astral.sh/uv/install.ps1 | iex"  # Windows
+# Or: pip install uv
 
-# Create virtual environment and install dependencies
-uv sync
+# Clone repository and sync dependencies
+git clone https://github.com/ijo42/square-root-calculator.git
+cd square-root-calculator
+uv sync --dev
 
-# Activate virtual environment
-source .venv/bin/activate  # On Windows: .venv\Scripts\activate
+# Run application
+uv run python main.py
 ```
 
 ### Adding New Languages

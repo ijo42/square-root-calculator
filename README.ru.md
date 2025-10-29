@@ -153,26 +153,21 @@ run_tests.bat
 # Кроссплатформенно
 python run_tests.py
 
-# Быстрые тесты
-./test_quick.sh
-
-# С использованием Make
-make test
-make test-quick
-make coverage
+# С использованием uv run
+uv run python run_tests.py
 ```
 
 ### Ручное выполнение
 
 ```bash
-# Установка зависимостей для разработки
-pip install -e ".[dev]"
+# Синхронизация зависимостей с uv
+uv sync --dev
 
 # Запуск всех тестов
-pytest
+uv run pytest
 
 # С отчётом о покрытии
-pytest --cov=src/square_root_calculator --cov-report=html
+uv run pytest --cov=src/square_root_calculator --cov-report=html
 
 # Открыть HTML отчёт
 # Linux/macOS: open htmlcov/index.html
@@ -229,24 +224,24 @@ square-root-calculator/
 git clone https://github.com/ijo42/square-root-calculator.git
 cd square-root-calculator
 
-# Установить зависимости для разработки
-pip install -e ".[dev]"
+# Синхронизировать зависимости с uv
+uv sync --dev
 ```
 
 ### Полезные команды
 
 ```bash
 # Запуск приложения
-python main.py
+uv run python main.py
 
 # Тесты
-make test           # Полный набор с покрытием
-make test-quick     # Быстрые тесты
-make coverage       # Открыть отчёт о покрытии
+./run_tests.sh      # Полный набор с покрытием (Linux/macOS)
+run_tests.bat       # Полный набор с покрытием (Windows)
+uv run pytest       # Прямой запуск pytest
 
 # Качество кода
-make lint           # Проверки линтером
-make format         # Автоформатирование
+uv run black src/   # Автоформатирование
+uv run flake8 src/  # Проверки линтером
 
 # Очистка
 make clean          # Удалить сгенерированные файлы
