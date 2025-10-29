@@ -2,6 +2,8 @@
 
 A comprehensive, cross-platform square root calculator with support for real numbers, complex numbers, and arbitrary precision calculations.
 
+![Application Screenshots](https://github.com/user-attachments/assets/3bef0438-43f0-4599-af52-a3477af5cbd2)
+
 ## Features
 
 - **Real Number Support**: Calculate square roots of positive real numbers
