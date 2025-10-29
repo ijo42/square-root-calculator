@@ -109,27 +109,7 @@ jobs:
         
     - name: Build Linux executable with PyInstaller
       run: |
-        uv run pyinstaller --name SquareRootCalculator \
-          --onefile \
-          --windowed \
-          --icon=NONE \
-          --hidden-import=PyQt6 \
-          --hidden-import=PyQt6.QtCore \
-          --hidden-import=PyQt6.QtGui \
-          --hidden-import=PyQt6.QtWidgets \
-          --hidden-import=qt_material \
-          --hidden-import=square_root_calculator \
-          --hidden-import=square_root_calculator.core \
-          --hidden-import=square_root_calculator.core.calculator \
-          --hidden-import=square_root_calculator.core.history \
-          --hidden-import=square_root_calculator.core.settings \
-          --hidden-import=square_root_calculator.core.update_checker \
-          --hidden-import=square_root_calculator.ui \
-          --hidden-import=square_root_calculator.ui.main_window \
-          --hidden-import=square_root_calculator.locales \
-          --hidden-import=square_root_calculator.locales.translator \
-          --add-data "src/square_root_calculator:square_root_calculator" \
-          main.py
+        uv run pyinstaller square_root_calculator.spec
         
     - name: Upload Linux executable
       uses: actions/upload-artifact@v4
@@ -163,27 +143,7 @@ jobs:
         
     - name: Build Windows executable with PyInstaller
       run: |
-        uv run pyinstaller --name SquareRootCalculator `
-          --onefile `
-          --windowed `
-          --icon=NONE `
-          --hidden-import=PyQt6 `
-          --hidden-import=PyQt6.QtCore `
-          --hidden-import=PyQt6.QtGui `
-          --hidden-import=PyQt6.QtWidgets `
-          --hidden-import=qt_material `
-          --hidden-import=square_root_calculator `
-          --hidden-import=square_root_calculator.core `
-          --hidden-import=square_root_calculator.core.calculator `
-          --hidden-import=square_root_calculator.core.history `
-          --hidden-import=square_root_calculator.core.settings `
-          --hidden-import=square_root_calculator.core.update_checker `
-          --hidden-import=square_root_calculator.ui `
-          --hidden-import=square_root_calculator.ui.main_window `
-          --hidden-import=square_root_calculator.locales `
-          --hidden-import=square_root_calculator.locales.translator `
-          --add-data "src/square_root_calculator;square_root_calculator" `
-          main.py
+        uv run pyinstaller square_root_calculator.spec
       shell: powershell
         
     - name: Upload Windows executable

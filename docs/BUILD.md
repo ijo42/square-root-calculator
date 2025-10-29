@@ -81,9 +81,17 @@ uv run python run_tests.py
 
 ### Build Specification File
 
-Create a file named `square_root_calculator.spec`:
+The repository includes a pre-configured `square_root_calculator.spec` file that contains all necessary build settings:
+
+- **hiddenimports**: All PyQt6 modules and application modules
+- **datas**: Includes source code for runtime imports
+- **onefile**: Single executable file
+- **windowed**: GUI application (no console window)
+
+You can use this file directly without modification:
 
 ```python
+# square_root_calculator.spec (already in repository)
 # -*- mode: python ; coding: utf-8 -*-
 
 block_cipher = None
@@ -92,7 +100,9 @@ a = Analysis(
     ['main.py'],
     pathex=[],
     binaries=[],
-    datas=[],
+    datas=[
+        ('src/square_root_calculator', 'square_root_calculator'),
+    ],
     hiddenimports=[
         'PyQt6',
         'PyQt6.QtCore',
