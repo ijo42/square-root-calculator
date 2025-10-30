@@ -50,13 +50,12 @@ from .components import apply_theme_to_window, get_output_stylesheet
 from .history_display import HistoryDisplayManager
 
 
-
 class MainWindow(QMainWindow):
     """Main application window.
 
     Главное окно приложения.
     """
-    
+
     # UI dimension constants
     LABEL_MIN_WIDTH = 120
     INPUT_MIN_WIDTH = 200
@@ -113,17 +112,17 @@ class MainWindow(QMainWindow):
 
         # Mode selection using tabs (more convenient)
         self.mode_tabs = QTabWidget()
-        
+
         # Create a horizontal layout to hold mode tabs and precision control side by side
         top_row_layout = QHBoxLayout()
-        
+
         # Left side: Mode tabs with input fields
         input_container = QWidget()
         input_container_layout = QVBoxLayout()
         input_container_layout.setContentsMargins(0, 0, 0, 0)
         input_container.setLayout(input_container_layout)
         input_container_layout.addWidget(self.mode_tabs)
-        
+
         # Real numbers tab
         real_tab = QWidget()
         real_layout = QVBoxLayout()
@@ -172,7 +171,6 @@ class MainWindow(QMainWindow):
         complex_layout.addStretch()
 
         self.mode_tabs.addTab(complex_tab, "")  # Text will be set in update_ui_text
-
 
         # Buttons
         button_layout = QHBoxLayout()
@@ -472,10 +470,10 @@ class MainWindow(QMainWindow):
         # Update output area stylesheet
         output_style = get_output_stylesheet(theme)
         self.result_display.setStyleSheet(output_style)
-        
+
         # Update group box title colors based on theme
         title_color = "#ffffff" if theme == "dark" else "#0066cc"
-        
+
         groupbox_style = f"""
             QGroupBox {{
                 font-weight: bold;
@@ -488,7 +486,7 @@ class MainWindow(QMainWindow):
                 color: {title_color};
             }}
         """
-        
+
         self.precision_group.setStyleSheet(groupbox_style)
         self.result_group.setStyleSheet(groupbox_style)
         self.history_group.setStyleSheet(groupbox_style)
@@ -555,66 +553,70 @@ class MainWindow(QMainWindow):
 
     def normalize_number_input(self, text: str) -> str:
         """Normalize number input by replacing comma with dot and validating.
-        
+
         Нормализовать числовой ввод, заменяя запятую на точку и проверяя.
-        
+
         Args:
             text: Input text to normalize
-            
+
         Returns:
             Normalized number string
-            
+
         Raises:
             InvalidInputError: If input contains invalid characters
         """
         if not text:
             return text
-            
+
         # Check for invalid characters before normalization
         # Allow: digits, comma OR dot (but not both in validation), minus, plus, 'i' character, and whitespace
-        if not re.match(r'^[0-9.,\-+i\s]+$', text):
+        if not re.match(r"^[0-9.,\-+i\s]+$", text):
             raise InvalidInputError(
-                self.translator.get("invalid_input") + ": " + 
-                self.translator.get("text_instead_of_numbers")
+                self.translator.get("invalid_input")
+                + ": "
+                + self.translator.get("text_instead_of_numbers")
             )
-        
+
         # Replace comma with dot for decimal separator
         normalized = text.replace(",", ".")
-        
+
         # Additional validation: check for multiple decimal points in a single number
         # For complex numbers, handle real and imaginary parts separately
-        if 'i' in normalized:
+        if "i" in normalized:
             # Remove 'i' and split by + or - (keeping the sign)
-            temp = normalized.replace('i', '')
+            temp = normalized.replace("i", "")
             # Split but keep delimiters
-            parts = re.split(r'(\+|\-)', temp)
+            parts = re.split(r"(\+|\-)", temp)
             # Reconstruct parts and check each number component
             current = ""
             for i, part in enumerate(parts):
-                if part in ['+', '-']:
-                    if current and current.count('.') > 1:
+                if part in ["+", "-"]:
+                    if current and current.count(".") > 1:
                         raise InvalidInputError(
-                            self.translator.get("invalid_input") + ": Multiple decimal separators"
+                            self.translator.get("invalid_input")
+                            + ": Multiple decimal separators"
                         )
                     current = part if i == 0 else ""
                 else:
                     current += part
-                    if i == len(parts) - 1 and current and current.count('.') > 1:
+                    if i == len(parts) - 1 and current and current.count(".") > 1:
                         raise InvalidInputError(
-                            self.translator.get("invalid_input") + ": Multiple decimal separators"
+                            self.translator.get("invalid_input")
+                            + ": Multiple decimal separators"
                         )
         else:
             # Simple number - just check for multiple dots
-            if normalized.strip().count('.') > 1:
+            if normalized.strip().count(".") > 1:
                 raise InvalidInputError(
-                    self.translator.get("invalid_input") + ": Multiple decimal separators"
+                    self.translator.get("invalid_input")
+                    + ": Multiple decimal separators"
                 )
-        
+
         return normalized
 
     def calculate(self, from_history=False):
         """Perform calculation based on current mode.
-        
+
         Args:
             from_history: Whether this calculation is from history recall (don't add to history again)
         """
@@ -721,7 +723,7 @@ class MainWindow(QMainWindow):
 
     def history_item_double_clicked(self, item):
         """Handle double-click on history item - recalculate with same parameters.
-        
+
         Обработать двойной клик по элементу истории - пересчитать с теми же параметрами.
         """
         entry = self.history_display.get_selected_entry()
@@ -729,7 +731,7 @@ class MainWindow(QMainWindow):
         if entry:
             # Save current precision
             current_precision = self.calculator.precision
-            
+
             # Set precision from history entry
             if entry.precision:
                 self.calculator.set_precision(entry.precision)
@@ -741,7 +743,7 @@ class MainWindow(QMainWindow):
                 self.precision_spinbox.blockSignals(True)
                 self.precision_spinbox.setValue(entry.precision)
                 self.precision_spinbox.blockSignals(False)
-            
+
             # Set mode and input fields from history entry
             if entry.is_complex:
                 # Switch to complex mode
@@ -754,10 +756,10 @@ class MainWindow(QMainWindow):
                 self.mode_tabs.setCurrentIndex(0)
                 # Set input value
                 self.input_field.setText(entry.input_value)
-            
+
             # Perform calculation (from_history=True to not add to history again)
             self.calculate(from_history=True)
-            
+
             # Restore precision if it was different
             if current_precision != entry.precision and entry.precision:
                 self.calculator.set_precision(current_precision)
@@ -783,7 +785,7 @@ class MainWindow(QMainWindow):
 
     def check_for_updates_async(self, manual=False):
         """Check for updates in background thread.
-        
+
         Args:
             manual: Whether this is a manual check initiated by the user
         """
@@ -821,7 +823,7 @@ class MainWindow(QMainWindow):
                 self.translator.get("check_updates"),
                 self.translator.get("no_update"),
             )
-        
+
         self._manual_check = False
 
     def show_error(self, message):
@@ -831,9 +833,7 @@ class MainWindow(QMainWindow):
     def show_about(self):
         """Show about dialog."""
         about_text = self.translator.get("about_text").format(__version__)
-        QMessageBox.about(
-            self, self.translator.get("about"), about_text
-        )
+        QMessageBox.about(self, self.translator.get("about"), about_text)
 
     def show_help(self):
         """Show help dialog."""

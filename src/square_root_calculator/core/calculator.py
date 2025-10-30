@@ -28,13 +28,15 @@ class InvalidInputError(CalculatorError):
 
 class PrecisionError(CalculatorError):
     """Exception raised when precision is too low for calculation.
-    
+
     Исключение, возникающее когда точность слишком низкая для вычисления.
     """
-    
-    def __init__(self, current_precision: int, required_precision: int, is_generic: bool = False):
+
+    def __init__(
+        self, current_precision: int, required_precision: int, is_generic: bool = False
+    ):
         """Initialize precision error.
-        
+
         Args:
             current_precision: Current precision setting
             required_precision: Minimum required precision
@@ -43,7 +45,9 @@ class PrecisionError(CalculatorError):
         self.current_precision = current_precision
         self.required_precision = required_precision
         self.is_generic = is_generic
-        super().__init__(f"Precision {current_precision} too low, need at least {required_precision}")
+        super().__init__(
+            f"Precision {current_precision} too low, need at least {required_precision}"
+        )
 
 
 class CalculationResult:
@@ -379,7 +383,7 @@ class SquareRootCalculator:
 
             # Handle the imaginary part calculation which may fail with low precision
             imag_value = (magnitude - a) / 2
-            
+
             # Check if the value is negative (can happen with rounding in low precision)
             if imag_value < 0:
                 # With very low precision, rounding errors can make this slightly negative
@@ -390,14 +394,18 @@ class SquareRootCalculator:
                     # Treat as zero
                     imag_part = Decimal(0)
                 else:
-                    raise PrecisionError(self.precision, self.precision + 2, is_generic=False)
+                    raise PrecisionError(
+                        self.precision, self.precision + 2, is_generic=False
+                    )
             else:
                 if b >= 0:
                     imag_part = imag_value.sqrt()
                 else:
                     imag_part = -imag_value.sqrt()
         except decimal.InvalidOperation as e:
-            raise PrecisionError(self.precision, max(10, self.precision + 5), is_generic=True)
+            raise PrecisionError(
+                self.precision, max(10, self.precision + 5), is_generic=True
+            )
 
         return real_part, imag_part
 
