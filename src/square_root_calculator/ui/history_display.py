@@ -74,7 +74,6 @@ class HistoryDisplayManager:
                     # Just imaginary part
                     real_part = "0"
                     imag_part = input_str
-                    imag_part = input_str
             else:
                 # Just real part
                 real_part = input_str

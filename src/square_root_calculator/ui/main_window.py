@@ -568,10 +568,30 @@ class MainWindow(QMainWindow):
         normalized = text.replace(",", ".")
         
         # Additional validation: check for multiple decimal points in a single number
-        # Split by operators and 'i' to check individual number components
-        parts = re.split(r'[+\-i]', normalized)
-        for part in parts:
-            if part.strip() and part.strip().count('.') > 1:
+        # For complex numbers, handle real and imaginary parts separately
+        if 'i' in normalized:
+            # Remove 'i' and split by + or - (keeping the sign)
+            temp = normalized.replace('i', '')
+            # Split but keep delimiters
+            parts = re.split(r'(\+|\-)', temp)
+            # Reconstruct parts and check each number component
+            current = ""
+            for i, part in enumerate(parts):
+                if part in ['+', '-']:
+                    if current and current.count('.') > 1:
+                        raise InvalidInputError(
+                            self.translator.get("invalid_input") + ": Multiple decimal separators"
+                        )
+                    current = part if i == 0 else ""
+                else:
+                    current += part
+                    if i == len(parts) - 1 and current and current.count('.') > 1:
+                        raise InvalidInputError(
+                            self.translator.get("invalid_input") + ": Multiple decimal separators"
+                        )
+        else:
+            # Simple number - just check for multiple dots
+            if normalized.strip().count('.') > 1:
                 raise InvalidInputError(
                     self.translator.get("invalid_input") + ": Multiple decimal separators"
                 )
