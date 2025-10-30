@@ -4,6 +4,7 @@
 """
 
 import json
+import sys
 from pathlib import Path
 from typing import Dict, List, Tuple
 
@@ -38,7 +39,12 @@ class Translator:
 
         Загрузить встроенные переводы из JSON файлов в папке locales.
         """
-        locales_dir = Path(__file__).parent
+        # For PyInstaller bundled app, use _MEIPASS
+        if getattr(sys, 'frozen', False):
+            base_path = Path(sys._MEIPASS)
+            locales_dir = base_path / "square_root_calculator" / "locales"
+        else:
+            locales_dir = Path(__file__).parent
 
         for json_file in locales_dir.glob("*.json"):
             try:

@@ -20,6 +20,7 @@ a = Analysis(
    binaries=[],
    datas=[
        ('src/square_root_calculator', 'square_root_calculator'),
+       ('pyproject.toml', '.'),
    ],
    hiddenimports=[
        'PyQt6',
