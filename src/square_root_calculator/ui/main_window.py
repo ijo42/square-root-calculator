@@ -132,11 +132,13 @@ class MainWindow(QMainWindow):
         self.input_label = QLabel()
         self.input_label.setMinimumWidth(self.LABEL_MIN_WIDTH)
         real_input_layout.addWidget(self.input_label)
+        real_input_layout.addStretch()
         self.input_field = QLineEdit()
         self.input_field.setPlaceholderText("0")
         self.input_field.setMinimumWidth(self.INPUT_MIN_WIDTH)
+        self.input_field.setMaximumWidth(self.INPUT_MIN_WIDTH)
+        self.input_field.setAlignment(Qt.AlignmentFlag.AlignRight)
         real_input_layout.addWidget(self.input_field)
-        real_input_layout.addStretch()
         real_layout.addLayout(real_input_layout)
         real_layout.addStretch()
 
@@ -151,22 +153,26 @@ class MainWindow(QMainWindow):
         self.real_part_label = QLabel()
         self.real_part_label.setMinimumWidth(self.LABEL_MIN_WIDTH)
         real_row.addWidget(self.real_part_label)
+        real_row.addStretch()
         self.real_part_field = QLineEdit()
         self.real_part_field.setPlaceholderText("0")
         self.real_part_field.setMinimumWidth(self.INPUT_MIN_WIDTH)
+        self.real_part_field.setMaximumWidth(self.INPUT_MIN_WIDTH)
+        self.real_part_field.setAlignment(Qt.AlignmentFlag.AlignRight)
         real_row.addWidget(self.real_part_field)
-        real_row.addStretch()
         complex_layout.addLayout(real_row)
 
         imag_row = QHBoxLayout()
         self.imag_part_label = QLabel()
         self.imag_part_label.setMinimumWidth(self.LABEL_MIN_WIDTH)
         imag_row.addWidget(self.imag_part_label)
+        imag_row.addStretch()
         self.imag_part_field = QLineEdit()
         self.imag_part_field.setPlaceholderText("0")
         self.imag_part_field.setMinimumWidth(self.INPUT_MIN_WIDTH)
+        self.imag_part_field.setMaximumWidth(self.INPUT_MIN_WIDTH)
+        self.imag_part_field.setAlignment(Qt.AlignmentFlag.AlignRight)
         imag_row.addWidget(self.imag_part_field)
-        imag_row.addStretch()
         complex_layout.addLayout(imag_row)
         complex_layout.addStretch()
 
@@ -497,11 +503,12 @@ class MainWindow(QMainWindow):
             QGroupBox {{
                 font-weight: bold;
                 font-size: 13px;
+                padding-top: 15px;
             }}
             QGroupBox::title {{
                 subcontrol-origin: margin;
                 subcontrol-position: top left;
-                padding: 2px 5px;
+                padding: 5px 8px;
                 color: {title_color};
             }}
         """
