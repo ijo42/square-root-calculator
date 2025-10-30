@@ -10,30 +10,31 @@ jobs:
   test:
     name: Run Tests
     runs-on: ubuntu-latest
+    env:
+      DISPLAY: ':99'
+      QT_QPA_PLATFORM: offscreen
     
     steps:
     - name: Checkout code
       uses: actions/checkout@v4
       
+    - name: Set up Python
+      uses: actions/setup-python@v5
+      with:
+        python-version: '3.12'
+        
     - name: Set up uv
       uses: astral-sh/setup-uv@v3
       with:
         enable-cache: true
         cache-dependency-glob: "pyproject.toml"
         
-    - name: Set up Python
-      uses: actions/setup-python@v5
-      with:
-        python-version: '3.12'
-        
     - name: Install dependencies with uv
       run: uv sync --dev
         
     - name: Run tests with coverage (headless)
       run: |
-        uv run pytest --cov=src/square_root_calculator --cov-report=html --cov-report=xml --cov-report=term -p no:qt
-      env:
-        QT_QPA_PLATFORM: offscreen
+        uv run pytest --cov=src/square_root_calculator --cov-report=html --cov-report=xml --cov-report=term -p no:qt -v --no-header
         
     - name: Upload coverage reports
       uses: codecov/codecov-action@v4
@@ -58,16 +59,16 @@ jobs:
     - name: Checkout code
       uses: actions/checkout@v4
       
+    - name: Set up Python
+      uses: actions/setup-python@v5
+      with:
+        python-version: '3.12'
+        
     - name: Set up uv
       uses: astral-sh/setup-uv@v3
       with:
         enable-cache: true
         cache-dependency-glob: "pyproject.toml"
-        
-    - name: Set up Python
-      uses: actions/setup-python@v5
-      with:
-        python-version: '3.12'
         
     - name: Install dependencies with uv
       run: uv sync --dev
@@ -90,16 +91,16 @@ jobs:
     - name: Checkout code
       uses: actions/checkout@v4
       
+    - name: Set up Python
+      uses: actions/setup-python@v5
+      with:
+        python-version: '3.12'
+        
     - name: Set up uv
       uses: astral-sh/setup-uv@v3
       with:
         enable-cache: true
         cache-dependency-glob: "pyproject.toml"
-        
-    - name: Set up Python
-      uses: actions/setup-python@v5
-      with:
-        python-version: '3.12'
         
     - name: Install dependencies with uv
       run: uv sync --dev
@@ -124,16 +125,16 @@ jobs:
     - name: Checkout code
       uses: actions/checkout@v4
       
+    - name: Set up Python
+      uses: actions/setup-python@v5
+      with:
+        python-version: '3.12'
+        
     - name: Set up uv
       uses: astral-sh/setup-uv@v3
       with:
         enable-cache: true
         cache-dependency-glob: "pyproject.toml"
-        
-    - name: Set up Python
-      uses: actions/setup-python@v5
-      with:
-        python-version: '3.12'
       
     - name: Install dependencies with uv
       run: uv sync --dev
