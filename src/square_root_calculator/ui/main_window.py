@@ -813,9 +813,12 @@ class MainWindow(QMainWindow):
 
         if has_update and version:
             message = self.translator.get("update_message").format(version, __version__)
-            QMessageBox.information(
+            reply = QMessageBox.information(
                 self, self.translator.get("update_available"), message
             )
+            # Open the download URL in the browser
+            download_url = self.translator.get("download_url")
+            QDesktopServices.openUrl(QUrl(download_url))
         elif self._manual_check:
             # Only show "no update" if manually checked
             QMessageBox.information(
