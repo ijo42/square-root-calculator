@@ -47,7 +47,7 @@ class HistoryDisplayManager:
             if "i" in input_str:
                 # Complex input - remove 'i' for parsing
                 input_str = input_str.replace("i", "")
-                
+
                 # Handle different formats
                 if "+" in input_str:
                     # Format: "a+bi" or "-a+bi"

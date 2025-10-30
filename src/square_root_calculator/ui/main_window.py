@@ -49,7 +49,6 @@ from .components import apply_theme_to_window, get_output_stylesheet
 from .history_display import HistoryDisplayManager
 
 
-
 class MainWindow(QMainWindow):
     """Main application window.
 
@@ -548,66 +547,70 @@ class MainWindow(QMainWindow):
 
     def normalize_number_input(self, text: str) -> str:
         """Normalize number input by replacing comma with dot and validating.
-        
+
         Нормализовать числовой ввод, заменяя запятую на точку и проверяя.
-        
+
         Args:
             text: Input text to normalize
-            
+
         Returns:
             Normalized number string
-            
+
         Raises:
             InvalidInputError: If input contains invalid characters
         """
         if not text:
             return text
-            
+
         # Check for invalid characters before normalization
         # Allow: digits, comma OR dot (but not both in validation), minus, plus, 'i' character, and whitespace
-        if not re.match(r'^[0-9.,\-+i\s]+$', text):
+        if not re.match(r"^[0-9.,\-+i\s]+$", text):
             raise InvalidInputError(
-                self.translator.get("invalid_input") + ": " + 
-                self.translator.get("text_instead_of_numbers")
+                self.translator.get("invalid_input")
+                + ": "
+                + self.translator.get("text_instead_of_numbers")
             )
-        
+
         # Replace comma with dot for decimal separator
         normalized = text.replace(",", ".")
-        
+
         # Additional validation: check for multiple decimal points in a single number
         # For complex numbers, handle real and imaginary parts separately
-        if 'i' in normalized:
+        if "i" in normalized:
             # Remove 'i' and split by + or - (keeping the sign)
-            temp = normalized.replace('i', '')
+            temp = normalized.replace("i", "")
             # Split but keep delimiters
-            parts = re.split(r'(\+|\-)', temp)
+            parts = re.split(r"(\+|\-)", temp)
             # Reconstruct parts and check each number component
             current = ""
             for i, part in enumerate(parts):
-                if part in ['+', '-']:
-                    if current and current.count('.') > 1:
+                if part in ["+", "-"]:
+                    if current and current.count(".") > 1:
                         raise InvalidInputError(
-                            self.translator.get("invalid_input") + ": Multiple decimal separators"
+                            self.translator.get("invalid_input")
+                            + ": Multiple decimal separators"
                         )
                     current = part if i == 0 else ""
                 else:
                     current += part
-                    if i == len(parts) - 1 and current and current.count('.') > 1:
+                    if i == len(parts) - 1 and current and current.count(".") > 1:
                         raise InvalidInputError(
-                            self.translator.get("invalid_input") + ": Multiple decimal separators"
+                            self.translator.get("invalid_input")
+                            + ": Multiple decimal separators"
                         )
         else:
             # Simple number - just check for multiple dots
-            if normalized.strip().count('.') > 1:
+            if normalized.strip().count(".") > 1:
                 raise InvalidInputError(
-                    self.translator.get("invalid_input") + ": Multiple decimal separators"
+                    self.translator.get("invalid_input")
+                    + ": Multiple decimal separators"
                 )
-        
+
         return normalized
 
     def calculate(self, from_history=False):
         """Perform calculation based on current mode.
-        
+
         Args:
             from_history: Whether this calculation is from history recall (don't add to history again)
         """
@@ -703,7 +706,7 @@ class MainWindow(QMainWindow):
 
     def history_item_double_clicked(self, item):
         """Handle double-click on history item - recalculate with same parameters.
-        
+
         Обработать двойной клик по элементу истории - пересчитать с теми же параметрами.
         """
         entry = self.history_display.get_selected_entry()
@@ -711,7 +714,7 @@ class MainWindow(QMainWindow):
         if entry:
             # Save current precision
             current_precision = self.calculator.precision
-            
+
             # Set precision from history entry
             if entry.precision:
                 self.calculator.set_precision(entry.precision)
@@ -723,7 +726,7 @@ class MainWindow(QMainWindow):
                 self.precision_spinbox.blockSignals(True)
                 self.precision_spinbox.setValue(entry.precision)
                 self.precision_spinbox.blockSignals(False)
-            
+
             # Set mode and input fields from history entry
             if entry.is_complex:
                 # Switch to complex mode
@@ -736,10 +739,10 @@ class MainWindow(QMainWindow):
                 self.mode_tabs.setCurrentIndex(0)
                 # Set input value
                 self.input_field.setText(entry.input_value)
-            
+
             # Perform calculation (from_history=True to not add to history again)
             self.calculate(from_history=True)
-            
+
             # Restore precision if it was different
             if current_precision != entry.precision and entry.precision:
                 self.calculator.set_precision(current_precision)
