@@ -172,7 +172,22 @@ class MainWindow(QMainWindow):
         complex_layout.addStretch()
 
         self.mode_tabs.addTab(complex_tab, "")  # Text will be set in update_ui_text
-        
+
+
+        # Buttons
+        button_layout = QHBoxLayout()
+        self.calculate_button = QPushButton()
+        self.calculate_button.setStyleSheet("font-size: 14px; padding: 8px;")
+        self.calculate_button.clicked.connect(self.calculate)
+        button_layout.addWidget(self.calculate_button)
+
+        self.clear_button = QPushButton()
+        self.clear_button.setStyleSheet("font-size: 14px; padding: 8px;")
+        self.clear_button.clicked.connect(self.clear_fields)
+        button_layout.addWidget(self.clear_button)
+
+        input_container_layout.addLayout(button_layout)
+
         top_row_layout.addWidget(input_container, stretch=3)
 
         # Right side: Precision control with slider
@@ -240,23 +255,9 @@ class MainWindow(QMainWindow):
 
         precision_group.setLayout(precision_layout)
         top_row_layout.addWidget(precision_group, stretch=2)
-        
+
         # Add the top row layout to main layout
         layout.addLayout(top_row_layout)
-
-        # Buttons
-        button_layout = QHBoxLayout()
-        self.calculate_button = QPushButton()
-        self.calculate_button.setStyleSheet("font-size: 14px; padding: 8px;")
-        self.calculate_button.clicked.connect(self.calculate)
-        button_layout.addWidget(self.calculate_button)
-
-        self.clear_button = QPushButton()
-        self.clear_button.setStyleSheet("font-size: 14px; padding: 8px;")
-        self.clear_button.clicked.connect(self.clear_fields)
-        button_layout.addWidget(self.clear_button)
-
-        layout.addLayout(button_layout)
 
         # Splitter for result and history
         splitter = QSplitter(Qt.Orientation.Horizontal)
