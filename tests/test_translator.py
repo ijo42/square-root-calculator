@@ -65,6 +65,8 @@ class TestTranslator:
     def test_get_available_languages(self, translator_en):
         """Test getting available languages."""
         languages = translator_en.get_available_languages()
-        assert "en" in languages
-        assert "ru" in languages
-        assert languages["en"] == "English"
+        lang_codes = [code for code, name in languages]
+        lang_dict = {code: name for code, name in languages}
+        assert "en" in lang_codes
+        assert "ru" in lang_codes
+        assert lang_dict["en"] == "English"

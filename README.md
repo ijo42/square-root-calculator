@@ -1,48 +1,61 @@
 # Square Root Calculator
-
 > **English version** | **[Русская версия](README.ru.md)**
 
 A comprehensive, cross-platform square root calculator with support for real numbers, complex numbers, and arbitrary precision calculations.
 
 ## Screenshots
 
+> **Note**: All screenshots below use the dark theme. A [light theme screenshot](#light-theme) is also available.
+
 ### Initial Interface
 <div align="center">
   <img src="docs/screenshots/screenshot_01_initial_english.png" alt="Initial Interface (English)" width="600"/>
-  <p><i>Initial interface with English language</i></p>
+  <p><i>Initial interface with English language (Dark Theme)</i></p>
 </div>
 
 ### Multilingual Support
 <div align="center">
   <img src="docs/screenshots/screenshot_02_russian.png" alt="Russian Interface" width="600"/>
-  <p><i>Russian language interface</i></p>
+  <p><i>Russian language interface (Dark Theme)</i></p>
 </div>
 
 ### Real Number Calculations
 <div align="center">
   <img src="docs/screenshots/screenshot_03_real_calculation.png" alt="Square Root of 2" width="600"/>
-  <p><i>Calculating √2 with 30 decimal places precision</i></p>
+  <p><i>Calculating √2 with 30 decimal places precision (Dark Theme)</i></p>
 </div>
 
 <div align="center">
   <img src="docs/screenshots/screenshot_04_large_number.png" alt="Large Number Calculation" width="600"/>
-  <p><i>Computing square root of large numbers (123,456,789)</i></p>
+  <p><i>Computing square root of large numbers (123,456,789) (Dark Theme)</i></p>
 </div>
 
 ### Complex Number Support
 <div align="center">
   <img src="docs/screenshots/screenshot_05_complex_mode.png" alt="Complex Mode" width="600"/>
-  <p><i>Complex number mode interface</i></p>
+  <p><i>Complex number mode interface (Dark Theme)</i></p>
 </div>
 
 <div align="center">
   <img src="docs/screenshots/screenshot_06_complex_calculation.png" alt="Complex Calculation" width="600"/>
-  <p><i>Calculating √(3+4i) = 2+1i</i></p>
+  <p><i>Calculating √(3+4i) = 2+1i (Dark Theme)</i></p>
 </div>
 
 <div align="center">
   <img src="docs/screenshots/screenshot_07_negative_complex.png" alt="Square Root of -1" width="600"/>
-  <p><i>Computing √(-1) = i in complex mode</i></p>
+  <p><i>Computing √(-1) = i in complex mode (Dark Theme)</i></p>
+</div>
+
+### Custom Language Support
+<div align="center">
+  <img src="docs/screenshots/screenshot_08_custom_language.png" alt="Custom Language (German)" width="600"/>
+  <p><i>Application with custom German translation loaded (Dark Theme)</i></p>
+</div>
+
+### Light Theme
+<div align="center">
+  <img src="docs/screenshots/screenshot_01_initial_light.png" alt="Light Theme Interface" width="600"/>
+  <p><i>Initial interface with Light Theme</i></p>
 </div>
 
 ## Features
@@ -65,40 +78,29 @@ A comprehensive, cross-platform square root calculator with support for real num
 - **Multilingual Interface**: Support for English and Russian languages
 - **Update Checker**: Automatic check for new versions from GitHub
 - **Error Handling**: Robust input validation and error messages
-- **Cross-Platform**: Works on Windows, macOS, and Linux
-
-## Requirements
-
-- Python 3.12 or higher
-- PyQt6
-- uv (for package management)
+- **Cross-Platform**: Works on Windows and Linux
+- **Theme Support**: Light and dark themes
 
 ## Installation
 
-1. Clone the repository:
-```bash
-git clone https://github.com/ijo42/square-root-calculator.git
-cd square-root-calculator
-```
+Download the latest pre-built executable for your platform from the [GitHub Releases](https://github.com/ijo42/square-root-calculator/releases) page:
 
-2. Install dependencies using uv:
-```bash
-uv sync
-```
+- **Windows**: Download `square-root-calculator.exe`
+- **Linux**: Download `square-root-calculator` (ELF binary)
+
+No Python installation required!
 
 ## Usage
 
 ### Running the Application
 
-```bash
-uv run python main.py
-```
+**Windows**: 
+- Double-click `square-root-calculator.exe`
 
-Or use the uv virtual environment:
-
+**Linux**: 
 ```bash
-source .venv/bin/activate  # On Windows: .venv\Scripts\activate
-python main.py
+chmod +x square-root-calculator
+./square-root-calculator
 ```
 
 ### Using the Calculator
@@ -145,195 +147,68 @@ python main.py
   - Positive root: `0+1i` (equivalent to √(-1) = i)
   - Negative root: `0-1i`
 
-## Project Structure
+## Updating the Application
 
-```
-square-root-calculator/
-├── src/
-│   └── square_root_calculator/
-│       ├── __init__.py
-│       ├── core/
-│       │   ├── __init__.py
-│       │   ├── calculator.py      # Core calculation logic with CalculationResult
-│       │   ├── history.py         # Calculation history management
-│       │   └── update_checker.py  # GitHub update checking
-│       ├── ui/
-│       │   ├── __init__.py
-│       │   └── main_window.py     # PyQt6 GUI with history panel
-│       └── locales/
-│           ├── __init__.py
-│           └── translator.py      # Multilingual support
-├── main.py                        # Application entry point
-├── pyproject.toml                 # Project configuration
-├── README.md                      # This file
-└── .gitignore                     # Git ignore rules
-```
+The application includes an automatic update checker that will notify you when new versions are available.
 
-## Architecture
+When an update is detected:
+1. A notification dialog will appear with **Download** and **Skip** buttons
+2. Click **Download** to open the releases page in your browser
+3. Click **Skip** to dismiss the notification and continue using the current version
 
-### Core Components
+To manually check for updates: **Help → Check for Updates**
 
-1. **Calculator Module** (`core/calculator.py`):
-   - `SquareRootCalculator`: Main calculator class with configurable precision
-   - Uses Python's `decimal` module for arbitrary precision arithmetic
-   - Supports both real and complex number calculations
+To update manually:
+1. Visit the [GitHub Releases](https://github.com/ijo42/square-root-calculator/releases) page
+2. Download the latest version for your platform
+3. Replace your old executable with the new one
 
-2. **UI Module** (`ui/main_window.py`):
-   - `MainWindow`: PyQt6-based graphical interface
-   - Responsive layout with mode switching
-   - Integrated precision control
+## Custom Translations
 
-3. **Localization Module** (`locales/translator.py`):
-   - `Translator`: Translation system supporting multiple languages
-   - Currently supports English and Russian
-   - Easy to extend with additional languages
+The application supports loading custom translations to add new languages or customize existing ones.
 
-## Testing
+### Adding Custom Translations
 
-The project includes a comprehensive test suite with 49 test cases covering all core functionality.
+1. Create a `translations` folder in the application directory
+2. Create a JSON file named with your language code (e.g., `de.json` for German)
+3. Add your translations in JSON format
+4. Use **Language → Reload Translations** to load the new translations
 
-### Quick Start
+### Example: German Translation (`translations/de.json`)
 
-**Linux/macOS:**
-```bash
-./run_tests.sh
-```
-
-**Windows:**
-```cmd
-run_tests.bat
-```
-
-**Cross-platform (Python):**
-```bash
-uv run python run_tests.py
-```
-
-### Test Scripts
-
-- **`run_tests.sh/bat`**: Full test suite with HTML coverage reports using uv
-- **`run_tests.py`**: Cross-platform Python test runner with uv
-
-### Manual Testing
-
-```bash
-# Sync dependencies with uv
-uv sync --dev
-
-# Run all tests
-uv run pytest
-
-# Run with coverage
-uv run pytest --cov=src/square_root_calculator --cov-report=html
-
-# Run specific test file
-uv run pytest tests/test_calculator.py
-
-# View coverage report
-open htmlcov/index.html  # macOS
-xdg-open htmlcov/index.html  # Linux
-start htmlcov/index.html  # Windows
-```
-
-### Test Coverage
-
-Current coverage: **~96%** with 49 test cases
-
-Test files:
-- `test_calculator.py` - Core calculation tests (16 tests)
-- `test_history.py` - History management tests (11 tests)
-- `test_translator.py` - Localization tests (13 tests)
-- `test_settings.py` - Settings management tests (9 tests)
-
-For detailed testing documentation, see [docs/TESTING.md](docs/TESTING.md).
-
-## Development
-
-### Setting Up Development Environment
-
-```bash
-# Install uv if not already installed (choose one method)
-curl -LsSf https://astral.sh/uv/install.sh | sh  # Linux/macOS
-powershell -c "irm https://astral.sh/uv/install.ps1 | iex"  # Windows
-# Or: pip install uv
-
-# Clone repository and sync dependencies
-git clone https://github.com/ijo42/square-root-calculator.git
-cd square-root-calculator
-uv sync --dev
-
-# Run application
-uv run python main.py
-```
-
-### Adding New Languages
-
-To add a new language, edit `src/square_root_calculator/locales/translator.py` and add a new entry to the `TRANSLATIONS` dictionary:
-
-```python
-TRANSLATIONS = {
-    'en': { ... },
-    'ru': { ... },
-    'fr': {  # New language
-        'app_title': 'Calculatrice de Racine Carrée',
-        # ... add all translation keys
-    }
+```json
+{
+  "app_title": "Quadratwurzel-Rechner",
+  "calculate_button": "Berechnen",
+  "clear_button": "Löschen",
+  "result_label": "Ergebnis"
 }
 ```
 
-## Technical Details
+For a complete list of translation keys and detailed instructions, see [translations/README.md](translations/README.md).
 
-### Precision Calculation
+### Alternative Location
 
-The calculator uses Python's `decimal` module with configurable precision:
-- Default precision: 50 decimal places
-- Range: 1 to 1000 decimal places
-- Precision affects all intermediate and final calculations
+Custom translations can also be placed in:
+- `~/.square_root_calculator/translations/` (user-specific)
 
-### Complex Number Algorithm
+## Documentation
 
-For a complex number z = a + bi, the square root is calculated using:
+For more detailed information:
+- [Usage Examples](docs/USAGE_EXAMPLES.md) - Detailed usage scenarios and tips
+- [Custom Translations Guide](translations/README.md) - How to add or customize translations
+- [Developer Documentation](docs/DEVELOPMENT.md) - For contributors and developers
 
-```
-√z = √((|z| + a)/2) + i · sign(b) · √((|z| - a)/2)
-```
+## Support
 
-where |z| = √(a² + b²)
-
-This algorithm ensures accurate results for all complex numbers.
-
-## Error Handling
-
-The application handles various error scenarios:
-- Invalid number format
-- Negative numbers in real mode
-- Invalid precision values
-- Calculation overflow/underflow
-
-All errors are displayed in user-friendly dialog boxes with localized messages.
-
-## Cross-Platform Support
-
-The application is built using:
-- **PyQt6**: Cross-platform GUI framework
-- **Python decimal module**: Standard library, available on all platforms
-- **uv**: Modern, cross-platform Python package manager
-
-Tested on:
-- Linux (Ubuntu 20.04+)
-- Windows 10/11
-- macOS 10.15+
+For issues, feature requests, or questions:
+- Open an issue on [GitHub Issues](https://github.com/ijo42/square-root-calculator/issues)
+- Read the [Usage Examples](docs/USAGE_EXAMPLES.md) for common scenarios
 
 ## License
 
 This project is open source and available under the MIT License.
 
-## Contributing
+## See Also
 
-Contributions are welcome! Please feel free to submit pull requests or open issues for bugs and feature requests.
-
-## Authors
-
-- Developed as a comprehensive square root calculator solution
-- Multilingual support for international users
-- High-precision calculations for scientific and educational use
+- **[Русская версия](README.ru.md)** - Russian version of this README

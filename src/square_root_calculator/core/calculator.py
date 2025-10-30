@@ -26,6 +26,30 @@ class InvalidInputError(CalculatorError):
     pass
 
 
+class PrecisionError(CalculatorError):
+    """Exception raised when precision is too low for calculation.
+
+    Исключение, возникающее когда точность слишком низкая для вычисления.
+    """
+
+    def __init__(
+        self, current_precision: int, required_precision: int, is_generic: bool = False
+    ):
+        """Initialize precision error.
+
+        Args:
+            current_precision: Current precision setting
+            required_precision: Minimum required precision
+            is_generic: Whether this is a generic precision error
+        """
+        self.current_precision = current_precision
+        self.required_precision = required_precision
+        self.is_generic = is_generic
+        super().__init__(
+            f"Precision {current_precision} too low, need at least {required_precision}"
+        )
+
+
 class CalculationResult:
     """Container for calculation results with multiple representations.
 
@@ -339,6 +363,8 @@ class SquareRootCalculator:
         Raises:
             InvalidInputError: If input is invalid
                               Если ввод некорректен
+            CalculatorError: If precision is too low for the calculation
+                           Если точность слишком низкая для вычисления
         """
         try:
             a = Decimal(str(real))
@@ -350,14 +376,36 @@ class SquareRootCalculator:
         # sqrt(z) = sqrt((|z| + a)/2) + i * sign(b) * sqrt((|z| - a)/2)
         # where |z| = sqrt(a^2 + b^2)
 
-        magnitude = (a**2 + b**2).sqrt()
+        try:
+            magnitude = (a**2 + b**2).sqrt()
 
-        real_part = ((magnitude + a) / 2).sqrt()
+            real_part = ((magnitude + a) / 2).sqrt()
 
-        if b >= 0:
-            imag_part = ((magnitude - a) / 2).sqrt()
-        else:
-            imag_part = -((magnitude - a) / 2).sqrt()
+            # Handle the imaginary part calculation which may fail with low precision
+            imag_value = (magnitude - a) / 2
+
+            # Check if the value is negative (can happen with rounding in low precision)
+            if imag_value < 0:
+                # With very low precision, rounding errors can make this slightly negative
+                # when it should be zero or very small positive. Use absolute value.
+                # Define tolerance as one order of magnitude larger than precision
+                tolerance = Decimal(10) ** (-self.precision + 1)
+                if abs(imag_value) < tolerance:
+                    # Treat as zero
+                    imag_part = Decimal(0)
+                else:
+                    raise PrecisionError(
+                        self.precision, self.precision + 2, is_generic=False
+                    )
+            else:
+                if b >= 0:
+                    imag_part = imag_value.sqrt()
+                else:
+                    imag_part = -imag_value.sqrt()
+        except decimal.InvalidOperation as e:
+            raise PrecisionError(
+                self.precision, max(10, self.precision + 5), is_generic=True
+            )
 
         return real_part, imag_part
 
