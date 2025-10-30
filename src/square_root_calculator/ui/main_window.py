@@ -59,6 +59,7 @@ class MainWindow(QMainWindow):
     def __init__(self):
         super().__init__()
         self.settings = Settings()
+        self._manual_check = False
 
         # Initialize with settings
         lang = self.settings.get("language", "en")
@@ -82,7 +83,7 @@ class MainWindow(QMainWindow):
         self.apply_theme(self.settings.get("theme", "light"))
 
         # Check for updates on startup (non-blocking)
-        self.check_for_updates_async()
+        self.check_for_updates_async(manual=False)
 
     def init_ui(self):
         """Initialize the user interface.
@@ -106,8 +107,17 @@ class MainWindow(QMainWindow):
 
         # Mode selection using tabs (more convenient)
         self.mode_tabs = QTabWidget()
-        layout.addWidget(self.mode_tabs)
-
+        
+        # Create a horizontal layout to hold mode tabs and precision control side by side
+        top_row_layout = QHBoxLayout()
+        
+        # Left side: Mode tabs with input fields
+        input_container = QWidget()
+        input_container_layout = QVBoxLayout()
+        input_container_layout.setContentsMargins(0, 0, 0, 0)
+        input_container.setLayout(input_container_layout)
+        input_container_layout.addWidget(self.mode_tabs)
+        
         # Real numbers tab
         real_tab = QWidget()
         real_layout = QVBoxLayout()
@@ -115,10 +125,13 @@ class MainWindow(QMainWindow):
 
         real_input_layout = QHBoxLayout()
         self.input_label = QLabel()
+        self.input_label.setMinimumWidth(120)
         real_input_layout.addWidget(self.input_label)
         self.input_field = QLineEdit()
         self.input_field.setPlaceholderText("0")
+        self.input_field.setMinimumWidth(200)
         real_input_layout.addWidget(self.input_field)
+        real_input_layout.addStretch()
         real_layout.addLayout(real_input_layout)
         real_layout.addStretch()
 
@@ -131,41 +144,35 @@ class MainWindow(QMainWindow):
 
         real_row = QHBoxLayout()
         self.real_part_label = QLabel()
+        self.real_part_label.setMinimumWidth(120)
         real_row.addWidget(self.real_part_label)
         self.real_part_field = QLineEdit()
         self.real_part_field.setPlaceholderText("0")
+        self.real_part_field.setMinimumWidth(200)
         real_row.addWidget(self.real_part_field)
+        real_row.addStretch()
         complex_layout.addLayout(real_row)
 
         imag_row = QHBoxLayout()
         self.imag_part_label = QLabel()
+        self.imag_part_label.setMinimumWidth(120)
         imag_row.addWidget(self.imag_part_label)
         self.imag_part_field = QLineEdit()
         self.imag_part_field.setPlaceholderText("0")
+        self.imag_part_field.setMinimumWidth(200)
         imag_row.addWidget(self.imag_part_field)
+        imag_row.addStretch()
         complex_layout.addLayout(imag_row)
         complex_layout.addStretch()
 
         self.mode_tabs.addTab(complex_tab, "")  # Text will be set in update_ui_text
+        
+        top_row_layout.addWidget(input_container, stretch=2)
 
-        # Precision control with slider
+        # Right side: Precision control with slider
         precision_group = QGroupBox()
         self.precision_group = precision_group
-        # Add contrasting style for group box title
-        precision_group.setStyleSheet(
-            """
-            QGroupBox {
-                font-weight: bold;
-                font-size: 13px;
-            }
-            QGroupBox::title {
-                subcontrol-origin: margin;
-                subcontrol-position: top left;
-                padding: 2px 5px;
-                color: #0066cc;
-            }
-        """
-        )
+        precision_group.setMinimumWidth(250)
         precision_layout = QVBoxLayout()
 
         # Precision value display
@@ -226,7 +233,10 @@ class MainWindow(QMainWindow):
             self.precision_spinbox.hide()
 
         precision_group.setLayout(precision_layout)
-        layout.addWidget(precision_group)
+        top_row_layout.addWidget(precision_group, stretch=1)
+        
+        # Add the top row layout to main layout
+        layout.addLayout(top_row_layout)
 
         # Buttons
         button_layout = QHBoxLayout()
@@ -249,21 +259,6 @@ class MainWindow(QMainWindow):
         # Result display with better formatting
         result_group = QGroupBox()
         self.result_group = result_group
-        # Add contrasting style for group box title
-        result_group.setStyleSheet(
-            """
-            QGroupBox {
-                font-weight: bold;
-                font-size: 13px;
-            }
-            QGroupBox::title {
-                subcontrol-origin: margin;
-                subcontrol-position: top left;
-                padding: 2px 5px;
-                color: #0066cc;
-            }
-        """
-        )
         result_layout = QVBoxLayout()
 
         self.result_display = QTextEdit()
@@ -286,21 +281,6 @@ class MainWindow(QMainWindow):
         # History panel
         history_group = QGroupBox()
         self.history_group = history_group
-        # Add contrasting style for group box title
-        history_group.setStyleSheet(
-            """
-            QGroupBox {
-                font-weight: bold;
-                font-size: 13px;
-            }
-            QGroupBox::title {
-                subcontrol-origin: margin;
-                subcontrol-position: top left;
-                padding: 2px 5px;
-                color: #0066cc;
-            }
-        """
-        )
         history_layout = QVBoxLayout()
 
         self.history_list = QListWidget()
@@ -485,6 +465,26 @@ class MainWindow(QMainWindow):
         # Update output area stylesheet
         output_style = get_output_stylesheet(theme)
         self.result_display.setStyleSheet(output_style)
+        
+        # Update group box title colors based on theme
+        title_color = "#ffffff" if theme == "dark" else "#0066cc"
+        
+        groupbox_style = f"""
+            QGroupBox {{
+                font-weight: bold;
+                font-size: 13px;
+            }}
+            QGroupBox::title {{
+                subcontrol-origin: margin;
+                subcontrol-position: top left;
+                padding: 2px 5px;
+                color: {title_color};
+            }}
+        """
+        
+        self.precision_group.setStyleSheet(groupbox_style)
+        self.result_group.setStyleSheet(groupbox_style)
+        self.history_group.setStyleSheet(groupbox_style)
 
     def toggle_exact_precision(self):
         """Toggle between slider and exact precision spinbox (mutually exclusive)."""
@@ -763,20 +763,32 @@ class MainWindow(QMainWindow):
         self.imag_part_field.clear()
         self.result_display.clear()
 
-    def check_for_updates_async(self):
-        """Check for updates in background thread."""
+    def check_for_updates_async(self, manual=False):
+        """Check for updates in background thread.
+        
+        Args:
+            manual: Whether this is a manual check initiated by the user
+        """
+        self._manual_check = manual
         self.update_thread = UpdateCheckThread(self.update_checker)
         self.update_thread.update_checked.connect(self.on_update_checked)
         self.update_thread.start()
 
     def check_for_updates_manual(self):
         """Manually check for updates (user initiated)."""
-        self.check_for_updates_async()
+        self.check_for_updates_async(manual=True)
 
     def on_update_checked(self, has_update: bool, version: str, error: str):
         """Handle update check result."""
         if error:
             # Only show error if manually checked
+            if self._manual_check:
+                QMessageBox.warning(
+                    self,
+                    self.translator.get("check_updates"),
+                    self.translator.get("update_check_failed") + f"\n\n{error}",
+                )
+            self._manual_check = False
             return
 
         if has_update and version:
@@ -784,13 +796,15 @@ class MainWindow(QMainWindow):
             QMessageBox.information(
                 self, self.translator.get("update_available"), message
             )
-        elif hasattr(self, "_manual_check"):
+        elif self._manual_check:
             # Only show "no update" if manually checked
             QMessageBox.information(
                 self,
                 self.translator.get("check_updates"),
                 self.translator.get("no_update"),
             )
+        
+        self._manual_check = False
 
     def show_error(self, message):
         """Display error message."""
@@ -798,8 +812,9 @@ class MainWindow(QMainWindow):
 
     def show_about(self):
         """Show about dialog."""
+        about_text = self.translator.get("about_text").format(__version__)
         QMessageBox.about(
-            self, self.translator.get("about"), self.translator.get("about_text")
+            self, self.translator.get("about"), about_text
         )
 
     def show_help(self):

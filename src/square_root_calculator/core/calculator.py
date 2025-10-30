@@ -339,6 +339,8 @@ class SquareRootCalculator:
         Raises:
             InvalidInputError: If input is invalid
                               Если ввод некорректен
+            CalculatorError: If precision is too low for the calculation
+                           Если точность слишком низкая для вычисления
         """
         try:
             a = Decimal(str(real))
@@ -350,14 +352,35 @@ class SquareRootCalculator:
         # sqrt(z) = sqrt((|z| + a)/2) + i * sign(b) * sqrt((|z| - a)/2)
         # where |z| = sqrt(a^2 + b^2)
 
-        magnitude = (a**2 + b**2).sqrt()
+        try:
+            magnitude = (a**2 + b**2).sqrt()
 
-        real_part = ((magnitude + a) / 2).sqrt()
+            real_part = ((magnitude + a) / 2).sqrt()
 
-        if b >= 0:
-            imag_part = ((magnitude - a) / 2).sqrt()
-        else:
-            imag_part = -((magnitude - a) / 2).sqrt()
+            # Handle the imaginary part calculation which may fail with low precision
+            imag_value = (magnitude - a) / 2
+            
+            # Check if the value is negative (can happen with rounding in low precision)
+            if imag_value < 0:
+                # With very low precision, rounding errors can make this slightly negative
+                # when it should be zero or very small positive. Use absolute value.
+                if abs(imag_value) < Decimal(10) ** (-self.precision + 1):
+                    # Treat as zero
+                    imag_part = Decimal(0)
+                else:
+                    raise CalculatorError(
+                        f"Precision too low for this calculation. Please increase precision to at least {self.precision + 2} decimal places."
+                    )
+            else:
+                if b >= 0:
+                    imag_part = imag_value.sqrt()
+                else:
+                    imag_part = -imag_value.sqrt()
+        except decimal.InvalidOperation as e:
+            raise CalculatorError(
+                f"Calculation error with current precision ({self.precision}). "
+                f"Please increase precision to at least {max(10, self.precision + 5)} decimal places for this calculation."
+            )
 
         return real_part, imag_part
 

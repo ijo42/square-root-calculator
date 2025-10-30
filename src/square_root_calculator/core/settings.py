@@ -4,6 +4,8 @@
 """
 
 import json
+import locale
+import sys
 from pathlib import Path
 from typing import Any, Dict
 
@@ -30,6 +32,92 @@ class Settings:
         self.settings_file = Path.home() / ".square_root_calculator" / "settings.json"
         self.settings = self.DEFAULT_SETTINGS.copy()
         self.load()
+        
+        # Apply system defaults if settings file doesn't exist or settings are default
+        self._apply_system_defaults()
+
+    def _apply_system_defaults(self):
+        """Apply system defaults for language and theme if not explicitly set.
+        
+        Применить системные значения по умолчанию для языка и темы, если они не установлены явно.
+        """
+        # Only apply system defaults if using the default settings
+        # (i.e., settings file didn't exist or didn't have these keys)
+        
+        # Detect system language
+        if self.settings.get("language") == self.DEFAULT_SETTINGS["language"]:
+            system_lang = self._get_system_language()
+            if system_lang in ["en", "ru"]:
+                self.settings["language"] = system_lang
+        
+        # Detect system theme (dark mode)
+        if self.settings.get("theme") == self.DEFAULT_SETTINGS["theme"]:
+            system_theme = self._get_system_theme()
+            if system_theme:
+                self.settings["theme"] = system_theme
+
+    def _get_system_language(self) -> str:
+        """Get system language.
+        
+        Получить системный язык.
+        
+        Returns:
+            Language code ('en', 'ru', etc.)
+        """
+        try:
+            # Try to get system locale
+            system_locale = locale.getdefaultlocale()[0]
+            if system_locale:
+                # Extract language code (e.g., 'en_US' -> 'en', 'ru_RU' -> 'ru')
+                lang_code = system_locale.split('_')[0].lower()
+                return lang_code
+        except Exception:
+            pass
+        return "en"
+    
+    def _get_system_theme(self) -> str:
+        """Get system theme (light/dark mode).
+        
+        Получить системную тему (светлый/тёмный режим).
+        
+        Returns:
+            Theme name ('light' or 'dark')
+        """
+        try:
+            # Try to detect dark mode on different platforms
+            if sys.platform == "darwin":  # macOS
+                import subprocess
+                result = subprocess.run(
+                    ["defaults", "read", "-g", "AppleInterfaceStyle"],
+                    capture_output=True,
+                    text=True
+                )
+                if result.returncode == 0 and "Dark" in result.stdout:
+                    return "dark"
+            elif sys.platform == "win32":  # Windows
+                try:
+                    import winreg
+                    key = winreg.OpenKey(
+                        winreg.HKEY_CURRENT_USER,
+                        r"Software\Microsoft\Windows\CurrentVersion\Themes\Personalize"
+                    )
+                    value, _ = winreg.QueryValueEx(key, "AppsUseLightTheme")
+                    winreg.CloseKey(key)
+                    return "light" if value == 1 else "dark"
+                except Exception:
+                    pass
+            elif sys.platform.startswith("linux"):  # Linux
+                # Try to detect from GTK settings
+                gtk_settings = Path.home() / ".config" / "gtk-3.0" / "settings.ini"
+                if gtk_settings.exists():
+                    with open(gtk_settings) as f:
+                        content = f.read()
+                        if "gtk-application-prefer-dark-theme=1" in content or "gtk-theme-name=.*dark" in content.lower():
+                            return "dark"
+        except Exception:
+            pass
+        
+        return "light"  # Default to light theme
 
     def load(self):
         """Load settings from file.

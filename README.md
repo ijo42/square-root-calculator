@@ -69,11 +69,23 @@ A comprehensive, cross-platform square root calculator with support for real num
 
 ## Requirements
 
-- Python 3.12 or higher
+- Python 3.12 or higher (for development)
 - PyQt6
-- uv (for package management)
+- uv (for package management during development)
 
 ## Installation
+
+### For Users (Recommended)
+
+Download the latest pre-built executable for your platform from the [GitHub Releases](https://github.com/ijo42/square-root-calculator/releases) page:
+
+- **Windows**: Download `square-root-calculator.exe`
+- **Linux**: Download `square-root-calculator` (ELF binary)
+- **macOS**: Download `square-root-calculator.app` (if available)
+
+No Python installation required for pre-built executables!
+
+### For Developers
 
 1. Clone the repository:
 ```bash
@@ -90,6 +102,13 @@ uv sync
 
 ### Running the Application
 
+**Pre-built Executable:**
+- **Windows**: Double-click `square-root-calculator.exe` or run from command line
+- **Linux**: Make executable and run: `chmod +x square-root-calculator && ./square-root-calculator`
+- **macOS**: Double-click the app bundle or run from terminal
+
+**From Source (Development):**
+
 ```bash
 uv run python main.py
 ```
@@ -100,6 +119,14 @@ Or use the uv virtual environment:
 source .venv/bin/activate  # On Windows: .venv\Scripts\activate
 python main.py
 ```
+
+### Updating the Application
+
+1. Visit the [GitHub Releases](https://github.com/ijo42/square-root-calculator/releases) page
+2. Download the latest version for your platform
+3. Replace your old executable with the new one
+
+The application also includes an automatic update checker that will notify you when new versions are available. You can manually check for updates via **Help → Check for Updates** menu.
 
 ### Using the Calculator
 
