@@ -59,10 +59,15 @@ jobs:
   lint:
     name: Code Quality
     runs-on: ubuntu-latest
+    permissions:
+      contents: write
     
     steps:
     - name: Checkout code
       uses: actions/checkout@v4
+      with:
+        ref: ${{ github.head_ref }}
+        token: ${{ secrets.GITHUB_TOKEN }}
       
     - name: Set up Python
       uses: actions/setup-python@v5
@@ -78,9 +83,21 @@ jobs:
     - name: Install dependencies with uv
       run: uv sync --dev
         
-    - name: Check code formatting with black
+    - name: Format code with black
       run: |
-        uv run black --check src/ tests/ || true
+        uv run black src/ tests/
+        
+    - name: Commit formatting changes
+      run: |
+        git config --local user.email "github-actions[bot]@users.noreply.github.com"
+        git config --local user.name "github-actions[bot]"
+        git add -A
+        git diff --quiet && git diff --staged --quiet || git commit -m "style: auto-format code with black"
+        
+    - name: Push changes
+      if: github.event_name == 'pull_request'
+      run: |
+        git push
         
     - name: Lint with flake8
       run: |

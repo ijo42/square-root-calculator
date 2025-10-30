@@ -424,7 +424,7 @@ class MainWindow(QMainWindow):
         
         # Update output area stylesheet
         output_style = get_output_stylesheet(theme)
-        self.output_text.setStyleSheet(output_style)
+        self.result_display.setStyleSheet(output_style)
     
     def toggle_exact_precision(self):
         """Toggle visibility of exact precision spinbox."""
