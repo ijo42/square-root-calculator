@@ -132,12 +132,12 @@ class MainWindow(QMainWindow):
             QGroupBox {
                 font-weight: bold;
                 font-size: 13px;
-                color: #000000;
             }
             QGroupBox::title {
                 subcontrol-origin: margin;
                 subcontrol-position: top left;
                 padding: 2px 5px;
+                color: #0066cc;
             }
         """)
         precision_layout = QVBoxLayout()
@@ -214,12 +214,12 @@ class MainWindow(QMainWindow):
             QGroupBox {
                 font-weight: bold;
                 font-size: 13px;
-                color: #000000;
             }
             QGroupBox::title {
                 subcontrol-origin: margin;
                 subcontrol-position: top left;
                 padding: 2px 5px;
+                color: #0066cc;
             }
         """)
         result_layout = QVBoxLayout()
@@ -248,12 +248,12 @@ class MainWindow(QMainWindow):
             QGroupBox {
                 font-weight: bold;
                 font-size: 13px;
-                color: #000000;
             }
             QGroupBox::title {
                 subcontrol-origin: margin;
                 subcontrol-position: top left;
                 padding: 2px 5px;
+                color: #0066cc;
             }
         """)
         history_layout = QVBoxLayout()
@@ -569,7 +569,7 @@ class MainWindow(QMainWindow):
             output = "<div style='font-family: Courier New; font-size: 12px;'>"
             output += f"<p style='margin: 5px 0;'><b>From History:</b></p>"
             output += f"<p style='margin: 5px 0;'><b>{self.translator.get('input_label')}</b> {entry.input_value}</p>"
-            output += f"<p style='margin: 5px 0; color: #0066cc;'><b>Result:</b> {entry.result_value[:50]}...</p>"
+            output += f"<p style='margin: 5px 0; color: #0066cc;'><b>Result:</b> {entry.result_text[:50]}...</p>"
             output += f"<p style='margin: 5px 0; font-size: 10px;'>Calculated: {entry.timestamp.strftime('%Y-%m-%d %H:%M:%S')}</p>"
             output += "</div>"
             

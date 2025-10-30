@@ -33,11 +33,12 @@ class HistoryDisplayManager:
         Args:
             result: CalculationResult to add to history
         """
+        # Format the result for display
+        result_text = str(result.roots[0]) if result.roots else "N/A"
+        
         self.history.add_entry(
             input_value=str(result.input_value),
-            result_value=str(result.roots[0]) if result.roots else "N/A",
-            precision=result.precision,
-            is_complex=result.is_complex
+            result_text=result_text
         )
         self.update_display()
     
@@ -51,12 +52,11 @@ class HistoryDisplayManager:
         entries = self.history.get_entries(limit=50)
         
         for entry in entries:
-            mode = self.translator.get('complex_mode') if entry.is_complex else self.translator.get('real_mode')
             # Only add "..." if the result is actually truncated
-            result_display = entry.result_value[:20]
-            if len(entry.result_value) > 20:
+            result_display = entry.result_text[:20]
+            if len(entry.result_text) > 20:
                 result_display += "..."
-            item_text = f"{entry.timestamp.strftime('%H:%M:%S')} | {mode} | √({entry.input_value}) ≈ {result_display}"
+            item_text = f"{entry.timestamp.strftime('%H:%M:%S')} | √({entry.input_value}) ≈ {result_display}"
             
             item = QListWidgetItem(item_text)
             item.setData(1, entry)  # Store entry object for later retrieval
