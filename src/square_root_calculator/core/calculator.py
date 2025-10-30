@@ -364,7 +364,9 @@ class SquareRootCalculator:
             if imag_value < 0:
                 # With very low precision, rounding errors can make this slightly negative
                 # when it should be zero or very small positive. Use absolute value.
-                if abs(imag_value) < Decimal(10) ** (-self.precision + 1):
+                # Define tolerance as one order of magnitude larger than precision
+                tolerance = Decimal(10) ** (-self.precision + 1)
+                if abs(imag_value) < tolerance:
                     # Treat as zero
                     imag_part = Decimal(0)
                 else:

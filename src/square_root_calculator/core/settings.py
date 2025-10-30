@@ -112,7 +112,7 @@ class Settings:
                 if gtk_settings.exists():
                     with open(gtk_settings) as f:
                         content = f.read()
-                        if "gtk-application-prefer-dark-theme=1" in content or "gtk-theme-name=.*dark" in content.lower():
+                        if "gtk-application-prefer-dark-theme=1" in content or "dark" in content.lower():
                             return "dark"
         except Exception:
             pass

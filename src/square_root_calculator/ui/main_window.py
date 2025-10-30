@@ -55,6 +55,11 @@ class MainWindow(QMainWindow):
 
     Главное окно приложения.
     """
+    
+    # UI dimension constants
+    LABEL_MIN_WIDTH = 120
+    INPUT_MIN_WIDTH = 200
+    PRECISION_GROUP_MIN_WIDTH = 250
 
     def __init__(self):
         super().__init__()
@@ -125,11 +130,11 @@ class MainWindow(QMainWindow):
 
         real_input_layout = QHBoxLayout()
         self.input_label = QLabel()
-        self.input_label.setMinimumWidth(120)
+        self.input_label.setMinimumWidth(self.LABEL_MIN_WIDTH)
         real_input_layout.addWidget(self.input_label)
         self.input_field = QLineEdit()
         self.input_field.setPlaceholderText("0")
-        self.input_field.setMinimumWidth(200)
+        self.input_field.setMinimumWidth(self.INPUT_MIN_WIDTH)
         real_input_layout.addWidget(self.input_field)
         real_input_layout.addStretch()
         real_layout.addLayout(real_input_layout)
@@ -144,22 +149,22 @@ class MainWindow(QMainWindow):
 
         real_row = QHBoxLayout()
         self.real_part_label = QLabel()
-        self.real_part_label.setMinimumWidth(120)
+        self.real_part_label.setMinimumWidth(self.LABEL_MIN_WIDTH)
         real_row.addWidget(self.real_part_label)
         self.real_part_field = QLineEdit()
         self.real_part_field.setPlaceholderText("0")
-        self.real_part_field.setMinimumWidth(200)
+        self.real_part_field.setMinimumWidth(self.INPUT_MIN_WIDTH)
         real_row.addWidget(self.real_part_field)
         real_row.addStretch()
         complex_layout.addLayout(real_row)
 
         imag_row = QHBoxLayout()
         self.imag_part_label = QLabel()
-        self.imag_part_label.setMinimumWidth(120)
+        self.imag_part_label.setMinimumWidth(self.LABEL_MIN_WIDTH)
         imag_row.addWidget(self.imag_part_label)
         self.imag_part_field = QLineEdit()
         self.imag_part_field.setPlaceholderText("0")
-        self.imag_part_field.setMinimumWidth(200)
+        self.imag_part_field.setMinimumWidth(self.INPUT_MIN_WIDTH)
         imag_row.addWidget(self.imag_part_field)
         imag_row.addStretch()
         complex_layout.addLayout(imag_row)
@@ -172,7 +177,7 @@ class MainWindow(QMainWindow):
         # Right side: Precision control with slider
         precision_group = QGroupBox()
         self.precision_group = precision_group
-        precision_group.setMinimumWidth(250)
+        precision_group.setMinimumWidth(self.PRECISION_GROUP_MIN_WIDTH)
         precision_layout = QVBoxLayout()
 
         # Precision value display
