@@ -197,6 +197,7 @@ class MainWindow(QMainWindow):
         button_layout.addWidget(self.calculate_button)
         
         self.clear_button = QPushButton()
+        self.clear_button.setStyleSheet("font-size: 14px; padding: 8px;")
         self.clear_button.clicked.connect(self.clear_fields)
         button_layout.addWidget(self.clear_button)
         
@@ -231,7 +232,6 @@ class MainWindow(QMainWindow):
             QTextEdit {
                 font-family: 'Courier New', monospace;
                 font-size: 12px;
-                background-color: #f5f5f5;
                 padding: 10px;
             }
         """)
