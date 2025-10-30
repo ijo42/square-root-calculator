@@ -125,7 +125,12 @@ class HistoryManager:
                       Мнимая часть для комплексных чисел
         """
         entry = HistoryEntry(
-            input_value, result_text, precision=precision, is_complex=is_complex, real_part=real_part, imag_part=imag_part
+            input_value,
+            result_text,
+            precision=precision,
+            is_complex=is_complex,
+            real_part=real_part,
+            imag_part=imag_part,
         )
         self.entries.insert(0, entry)  # Add to beginning
 

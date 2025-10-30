@@ -3,6 +3,7 @@
 Главное окно GUI для Калькулятора квадратного корня.
 """
 
+import re
 import sys
 import webbrowser
 from decimal import Decimal
@@ -46,6 +47,7 @@ from .. import __version__
 from .update_thread import UpdateCheckThread
 from .components import apply_theme_to_window, get_output_stylesheet
 from .history_display import HistoryDisplayManager
+
 
 
 class MainWindow(QMainWindow):
@@ -554,17 +556,25 @@ class MainWindow(QMainWindow):
         if not text:
             return text
             
-        # Replace comma with dot for decimal separator
-        normalized = text.replace(",", ".")
-        
-        # Check for invalid characters (allow digits, dot, minus, plus, and 'i' for complex)
-        import re
-        # Allow: digits, dot, minus, plus, 'i' character, and whitespace
+        # Check for invalid characters before normalization
+        # Allow: digits, comma OR dot (but not both in validation), minus, plus, 'i' character, and whitespace
         if not re.match(r'^[0-9.,\-+i\s]+$', text):
             raise InvalidInputError(
                 self.translator.get("invalid_input") + ": " + 
                 self.translator.get("text_instead_of_numbers")
             )
+        
+        # Replace comma with dot for decimal separator
+        normalized = text.replace(",", ".")
+        
+        # Additional validation: check for multiple decimal points in a single number
+        # Split by operators and 'i' to check individual number components
+        parts = re.split(r'[+\-i]', normalized)
+        for part in parts:
+            if part.strip() and part.strip().count('.') > 1:
+                raise InvalidInputError(
+                    self.translator.get("invalid_input") + ": Multiple decimal separators"
+                )
         
         return normalized
 

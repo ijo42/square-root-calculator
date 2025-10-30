@@ -42,22 +42,38 @@ class HistoryDisplayManager:
         imag_part = None
         if result.is_complex:
             # Parse the input_value to extract real and imaginary parts
-            # Format is like "3+4i" or "3-4i" or just "3" or "4i"
+            # Format is like "3+4i" or "3-4i" or just "3" or "4i" or "-3+4i" or "-3-4i"
             input_str = result.input_value
             if "i" in input_str:
-                # Complex input
+                # Complex input - remove 'i' for parsing
                 input_str = input_str.replace("i", "")
+                
+                # Handle different formats
                 if "+" in input_str:
+                    # Format: "a+bi" or "-a+bi"
                     parts = input_str.split("+")
                     real_part = parts[0] if parts[0] else "0"
                     imag_part = parts[1] if len(parts) > 1 else "0"
-                elif "-" in input_str and input_str.index("-") > 0:
+                elif input_str.count("-") == 1 and not input_str.startswith("-"):
+                    # Format: "a-bi" (minus not at start)
                     parts = input_str.split("-")
                     real_part = parts[0] if parts[0] else "0"
                     imag_part = "-" + parts[1] if len(parts) > 1 else "0"
+                elif input_str.count("-") == 2 and input_str.startswith("-"):
+                    # Format: "-a-bi" (both negative)
+                    # Remove leading minus, then split
+                    temp = input_str[1:]
+                    parts = temp.split("-")
+                    real_part = "-" + parts[0] if parts[0] else "0"
+                    imag_part = "-" + parts[1] if len(parts) > 1 else "0"
+                elif input_str.startswith("-") and "+" not in input_str:
+                    # Format: "-bi" (just negative imaginary)
+                    real_part = "0"
+                    imag_part = input_str
                 else:
                     # Just imaginary part
                     real_part = "0"
+                    imag_part = input_str
                     imag_part = input_str
             else:
                 # Just real part
