@@ -177,6 +177,7 @@ class MainWindow(QMainWindow):
         self.precision_value_label.setStyleSheet("font-weight: bold; font-size: 14px;")
         precision_value_layout.addWidget(self.precision_value_label)
         precision_value_layout.addStretch()
+        self.precision_value_layout = precision_value_layout
         precision_layout.addLayout(precision_value_layout)
 
         # Slider for quick adjustment
@@ -213,12 +214,14 @@ class MainWindow(QMainWindow):
         # Default to showing slider only
         show_exact = self.settings.get("show_exact_precision", False)
         if show_exact:
-            # Show spinbox, hide slider
+            # Show spinbox, hide slider and precision label/value
+            self.precision_label.hide()
+            self.precision_value_label.hide()
             self.slider_min_label.hide()
             self.precision_slider.hide()
             self.slider_max_label.hide()
         else:
-            # Show slider, hide spinbox
+            # Show slider and precision label/value, hide spinbox
             self.spinbox_label.hide()
             self.precision_spinbox.hide()
 
@@ -489,16 +492,20 @@ class MainWindow(QMainWindow):
         self.settings.set("show_exact_precision", show)
 
         if show:
-            # Show spinbox, hide slider
+            # Show spinbox, hide slider and precision label/value
             self.spinbox_label.show()
             self.precision_spinbox.show()
+            self.precision_label.hide()
+            self.precision_value_label.hide()
             self.slider_min_label.hide()
             self.precision_slider.hide()
             self.slider_max_label.hide()
         else:
-            # Show slider, hide spinbox
+            # Show slider and precision label/value, hide spinbox
             self.spinbox_label.hide()
             self.precision_spinbox.hide()
+            self.precision_label.show()
+            self.precision_value_label.show()
             self.slider_min_label.show()
             self.precision_slider.show()
             self.slider_max_label.show()
