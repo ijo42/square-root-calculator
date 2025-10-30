@@ -1,0 +1,8 @@
+{
+  "app_title": "Beispiel Taschenrechner",
+  "input_label": "Eingabewert:",
+  "calculate_button": "Berechnen",
+  "clear_button": "Löschen",
+  "result_label": "Ergebnis",
+  "precision_control": "Genauigkeitskontrolle"
+}

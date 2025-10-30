@@ -3,6 +3,8 @@
 Система локализации для поддержки нескольких языков.
 """
 
+import json
+from pathlib import Path
 from typing import Dict
 
 
@@ -59,6 +61,10 @@ class Translator:
             "no_update": "You are using the latest version",
             "check_updates": "Check for Updates",
             "download_url": "https://github.com/ijo42/square-root-calculator/releases",
+            "skip_update": "Skip",
+            "download_update": "Download",
+            "reload_translations": "Reload Translations",
+            "translations_reloaded": "Translations have been reloaded successfully!",
             "settings": "Settings",
             "theme": "Theme",
             "theme_light": "Light Theme",
@@ -116,6 +122,10 @@ class Translator:
             "no_update": "Вы используете последнюю версию",
             "check_updates": "Проверить обновления",
             "download_url": "https://github.com/ijo42/square-root-calculator/releases",
+            "skip_update": "Пропустить",
+            "download_update": "Скачать",
+            "reload_translations": "Обновить переводы",
+            "translations_reloaded": "Переводы успешно обновлены!",
             "settings": "Настройки",
             "theme": "Тема",
             "theme_light": "Светлая тема",
@@ -139,6 +149,50 @@ class Translator:
                      Код языка ('en' или 'ru')
         """
         self.language = language if language in self.TRANSLATIONS else "en"
+        self.custom_translations_loaded = False
+        self.load_custom_translations()
+
+    def load_custom_translations(self):
+        """Load custom translations from JSON files in translations folder.
+        
+        Загрузить пользовательские переводы из JSON файлов в папке translations.
+        """
+        try:
+            # Look for translations folder in current directory and app directory
+            translations_paths = [
+                Path("translations"),
+                Path.home() / ".square_root_calculator" / "translations",
+            ]
+            
+            for translations_dir in translations_paths:
+                if translations_dir.exists() and translations_dir.is_dir():
+                    for json_file in translations_dir.glob("*.json"):
+                        try:
+                            with open(json_file, 'r', encoding='utf-8') as f:
+                                custom_trans = json.load(f)
+                                # Assume filename is the language code (e.g., de.json for German)
+                                lang_code = json_file.stem
+                                
+                                if lang_code in self.TRANSLATIONS:
+                                    # Update existing language with custom translations
+                                    self.TRANSLATIONS[lang_code].update(custom_trans)
+                                else:
+                                    # Add new language
+                                    self.TRANSLATIONS[lang_code] = custom_trans
+                                
+                                self.custom_translations_loaded = True
+                        except (json.JSONDecodeError, Exception) as e:
+                            print(f"Failed to load translation from {json_file}: {e}")
+        except Exception as e:
+            print(f"Error loading custom translations: {e}")
+
+    def reload_translations(self):
+        """Reload all custom translations from JSON files.
+        
+        Перезагрузить все пользовательские переводы из JSON файлов.
+        """
+        # Reset to built-in translations first
+        self.__init__(self.language)
 
     def set_language(self, language: str):
         """Set the current language.

@@ -136,17 +136,52 @@ chmod +x square-root-calculator
 
 The application includes an automatic update checker that will notify you when new versions are available.
 
-To update:
+When an update is detected:
+1. A notification dialog will appear with **Download** and **Skip** buttons
+2. Click **Download** to open the releases page in your browser
+3. Click **Skip** to dismiss the notification and continue using the current version
+
+To manually check for updates: **Help → Check for Updates**
+
+To update manually:
 1. Visit the [GitHub Releases](https://github.com/ijo42/square-root-calculator/releases) page
 2. Download the latest version for your platform
 3. Replace your old executable with the new one
 
-You can also manually check for updates via **Help → Check for Updates** menu.
+## Custom Translations
+
+The application supports loading custom translations to add new languages or customize existing ones.
+
+### Adding Custom Translations
+
+1. Create a `translations` folder in the application directory
+2. Create a JSON file named with your language code (e.g., `de.json` for German)
+3. Add your translations in JSON format
+4. Use **Language → Reload Translations** to load the new translations
+
+### Example: German Translation (`translations/de.json`)
+
+```json
+{
+  "app_title": "Quadratwurzel-Rechner",
+  "calculate_button": "Berechnen",
+  "clear_button": "Löschen",
+  "result_label": "Ergebnis"
+}
+```
+
+For a complete list of translation keys and detailed instructions, see [translations/README.md](translations/README.md).
+
+### Alternative Location
+
+Custom translations can also be placed in:
+- `~/.square_root_calculator/translations/` (user-specific)
 
 ## Documentation
 
 For more detailed information:
 - [Usage Examples](docs/USAGE_EXAMPLES.md) - Detailed usage scenarios and tips
+- [Custom Translations Guide](translations/README.md) - How to add or customize translations
 - [Developer Documentation](docs/DEVELOPMENT.md) - For contributors and developers
 
 ## Support

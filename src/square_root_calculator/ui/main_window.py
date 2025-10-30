@@ -375,6 +375,13 @@ class MainWindow(QMainWindow):
             lambda: self.change_language_from_menu("ru")
         )
         self.language_menu.addAction(self.russian_action)
+        
+        self.language_menu.addSeparator()
+        
+        # Reload translations action
+        self.reload_translations_action = QAction("Reload Translations", self)
+        self.reload_translations_action.triggered.connect(self.reload_translations)
+        self.language_menu.addAction(self.reload_translations_action)
 
         # Help menu
         self.help_menu = menubar.addMenu("Help")
@@ -438,6 +445,7 @@ class MainWindow(QMainWindow):
             self.translator.get("show_negative_roots")
         )
         self.language_menu.setTitle(self.translator.get("language_menu"))
+        self.reload_translations_action.setText(self.translator.get("reload_translations"))
         self.help_menu.setTitle(self.translator.get("help"))
         self.user_manual_action.setText(self.translator.get("user_manual"))
         self.check_updates_action.setText(self.translator.get("check_updates"))
@@ -813,12 +821,29 @@ class MainWindow(QMainWindow):
 
         if has_update and version:
             message = self.translator.get("update_message").format(version, __version__)
-            reply = QMessageBox.information(
-                self, self.translator.get("update_available"), message
+            
+            # Create message box with custom buttons
+            msgBox = QMessageBox(self)
+            msgBox.setWindowTitle(self.translator.get("update_available"))
+            msgBox.setText(message)
+            msgBox.setIcon(QMessageBox.Icon.Information)
+            
+            # Add Download and Skip buttons
+            download_button = msgBox.addButton(
+                self.translator.get("download_update"), 
+                QMessageBox.ButtonRole.AcceptRole
             )
-            # Open the download URL in the browser
-            download_url = self.translator.get("download_url")
-            QDesktopServices.openUrl(QUrl(download_url))
+            skip_button = msgBox.addButton(
+                self.translator.get("skip_update"), 
+                QMessageBox.ButtonRole.RejectRole
+            )
+            
+            msgBox.exec()
+            
+            # If user clicked Download, open the download URL
+            if msgBox.clickedButton() == download_button:
+                download_url = self.translator.get("download_url")
+                QDesktopServices.openUrl(QUrl(download_url))
         elif self._manual_check:
             # Only show "no update" if manually checked
             QMessageBox.information(
@@ -828,6 +853,16 @@ class MainWindow(QMainWindow):
             )
 
         self._manual_check = False
+
+    def reload_translations(self):
+        """Reload custom translations from JSON files."""
+        self.translator.reload_translations()
+        self.update_ui_text()
+        QMessageBox.information(
+            self,
+            self.translator.get("app_title"),
+            self.translator.get("translations_reloaded"),
+        )
 
     def show_error(self, message):
         """Display error message."""
