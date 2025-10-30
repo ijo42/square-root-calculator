@@ -12,14 +12,8 @@ from PyQt6.QtWidgets import (
     QGroupBox, QRadioButton, QButtonGroup, QMessageBox, QMenuBar, QMenu,
     QSlider, QTabWidget, QListWidget, QSplitter
 )
-from PyQt6.QtCore import Qt, QThread, pyqtSignal, QUrl
+from PyQt6.QtCore import Qt, QUrl
 from PyQt6.QtGui import QAction, QDesktopServices
-
-try:
-    from qt_material import apply_stylesheet
-    HAS_QT_MATERIAL = True
-except ImportError:
-    HAS_QT_MATERIAL = False
 
 from ..core.calculator import SquareRootCalculator, InvalidInputError, CalculatorError, CalculationResult
 from ..core.history import HistoryManager
@@ -27,27 +21,9 @@ from ..core.update_checker import UpdateChecker
 from ..core.settings import Settings
 from ..locales.translator import Translator
 from .. import __version__
-
-
-class UpdateCheckThread(QThread):
-    """Thread for checking updates without blocking UI.
-    
-    Поток для проверки обновлений без блокировки пользовательского интерфейса.
-    """
-    
-    update_checked = pyqtSignal(bool, str, str)  # has_update, version, error
-    
-    def __init__(self, checker):
-        super().__init__()
-        self.checker = checker
-    
-    def run(self):
-        """Run update check in background.
-        
-        Запустить проверку обновлений в фоновом режиме.
-        """
-        has_update, version, error = self.checker.check_for_updates()
-        self.update_checked.emit(has_update, version or "", error or "")
+from .update_thread import UpdateCheckThread
+from .components import apply_theme_to_window, get_output_stylesheet
+from .history_display import HistoryDisplayManager
 
 
 class MainWindow(QMainWindow):
@@ -70,6 +46,13 @@ class MainWindow(QMainWindow):
         self.update_checker = UpdateChecker('ijo42', 'square-root-calculator', __version__)
         
         self.init_ui()
+        
+        # Initialize history display manager after UI is created
+        self.history_display = HistoryDisplayManager(
+            self.history_list,
+            self.history,
+            self.translator
+        )
         
         # Apply theme after UI is created
         self.apply_theme(self.settings.get('theme', 'light'))
@@ -397,37 +380,12 @@ class MainWindow(QMainWindow):
     
     def apply_theme(self, theme):
         """Apply the specified theme."""
-        if HAS_QT_MATERIAL:
-            try:
-                if theme == 'dark':
-                    apply_stylesheet(QApplication.instance(), theme='dark_blue.xml')
-                else:
-                    apply_stylesheet(QApplication.instance(), theme='light_blue.xml')
-            except Exception as e:
-                print(f"Could not apply theme: {e}")
-        else:
-            # Fallback to basic Qt style
-            if theme == 'dark':
-                QApplication.instance().setStyleSheet("""
-                    QWidget {
-                        background-color: #2b2b2b;
-                        color: #ffffff;
-                    }
-                    QLineEdit, QTextEdit, QSpinBox {
-                        background-color: #3c3c3c;
-                        border: 1px solid #555555;
-                    }
-                    QPushButton {
-                        background-color: #0066cc;
-                        border: none;
-                        padding: 5px;
-                    }
-                    QPushButton:hover {
-                        background-color: #0077ee;
-                    }
-                """)
-            else:
-                QApplication.instance().setStyleSheet("")
+        self.app = QApplication.instance()
+        apply_theme_to_window(self, theme)
+        
+        # Update output area stylesheet
+        output_style = get_output_stylesheet(theme)
+        self.output_text.setStyleSheet(output_style)
     
     def toggle_exact_precision(self):
         """Toggle visibility of exact precision spinbox."""
@@ -557,44 +515,22 @@ class MainWindow(QMainWindow):
     
     def add_to_history(self, result: CalculationResult):
         """Add calculation to history."""
-        formatted_roots = result.get_formatted_roots()
-        if len(formatted_roots) >= 1:
-            result_text = formatted_roots[0]  # Show positive root in history
-        else:
-            result_text = "?"
-        
-        self.history.add_entry(result.input_value, result_text)
-        self.update_history_display()
+        self.history_display.add_to_history(result)
     
     def update_history_display(self):
         """Update history list widget."""
-        self.history_list.clear()
-        
-        if self.history.is_empty():
-            self.history_list.addItem(self.translator.get('history_empty'))
-        else:
-            entries = self.history.get_entries(20)  # Show last 20
-            for entry in entries:
-                item_text = f"√({entry.input_value}) = {entry.result_text[:30]}..."
-                self.history_list.addItem(item_text)
+        self.history_display.update_display()
     
     def history_item_clicked(self, item):
         """Handle click on history item - display result in result pane."""
-        if self.history.is_empty():
-            return
+        entry = self.history_display.get_selected_entry()
         
-        # Get the index of clicked item
-        index = self.history_list.currentRow()
-        entries = self.history.get_entries(20)
-        
-        if 0 <= index < len(entries):
-            entry = entries[index]
-            
+        if entry:
             # Display in result pane
             output = "<div style='font-family: Courier New; font-size: 12px;'>"
             output += f"<p style='margin: 5px 0;'><b>From History:</b></p>"
             output += f"<p style='margin: 5px 0;'><b>{self.translator.get('input_label')}</b> {entry.input_value}</p>"
-            output += f"<p style='margin: 5px 0; color: #0066cc;'><b>Result:</b> {entry.result_text}</p>"
+            output += f"<p style='margin: 5px 0; color: #0066cc;'><b>Result:</b> {entry.result_value[:50]}...</p>"
             output += f"<p style='margin: 5px 0; font-size: 10px;'>Calculated: {entry.timestamp.strftime('%Y-%m-%d %H:%M:%S')}</p>"
             output += "</div>"
             
@@ -602,8 +538,7 @@ class MainWindow(QMainWindow):
     
     def clear_history(self):
         """Clear calculation history."""
-        self.history.clear()
-        self.update_history_display()
+        self.history_display.clear()
     
     def clear_fields(self):
         """Clear all input and output fields."""
