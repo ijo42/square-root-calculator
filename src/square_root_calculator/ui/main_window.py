@@ -37,6 +37,7 @@ from ..core.calculator import (
     SquareRootCalculator,
     InvalidInputError,
     CalculatorError,
+    PrecisionError,
     CalculationResult,
 )
 from ..core.history import HistoryManager
@@ -172,7 +173,7 @@ class MainWindow(QMainWindow):
 
         self.mode_tabs.addTab(complex_tab, "")  # Text will be set in update_ui_text
         
-        top_row_layout.addWidget(input_container, stretch=2)
+        top_row_layout.addWidget(input_container, stretch=3)
 
         # Right side: Precision control with slider
         precision_group = QGroupBox()
@@ -238,7 +239,7 @@ class MainWindow(QMainWindow):
             self.precision_spinbox.hide()
 
         precision_group.setLayout(precision_layout)
-        top_row_layout.addWidget(precision_group, stretch=1)
+        top_row_layout.addWidget(precision_group, stretch=2)
         
         # Add the top row layout to main layout
         layout.addLayout(top_row_layout)
@@ -644,6 +645,17 @@ class MainWindow(QMainWindow):
 
         except InvalidInputError as e:
             self.show_error(str(e))
+        except PrecisionError as e:
+            # Handle precision errors with proper translation
+            if e.is_generic:
+                error_msg = self.translator.get("precision_error_generic").format(
+                    e.current_precision, e.required_precision
+                )
+            else:
+                error_msg = self.translator.get("precision_too_low").format(
+                    e.required_precision
+                )
+            self.show_error(error_msg)
         except CalculatorError as e:
             self.show_error(self.translator.get("calculation_error").format(str(e)))
         except Exception as e:

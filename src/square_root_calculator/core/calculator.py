@@ -26,6 +26,26 @@ class InvalidInputError(CalculatorError):
     pass
 
 
+class PrecisionError(CalculatorError):
+    """Exception raised when precision is too low for calculation.
+    
+    Исключение, возникающее когда точность слишком низкая для вычисления.
+    """
+    
+    def __init__(self, current_precision: int, required_precision: int, is_generic: bool = False):
+        """Initialize precision error.
+        
+        Args:
+            current_precision: Current precision setting
+            required_precision: Minimum required precision
+            is_generic: Whether this is a generic precision error
+        """
+        self.current_precision = current_precision
+        self.required_precision = required_precision
+        self.is_generic = is_generic
+        super().__init__(f"Precision {current_precision} too low, need at least {required_precision}")
+
+
 class CalculationResult:
     """Container for calculation results with multiple representations.
 
@@ -370,19 +390,14 @@ class SquareRootCalculator:
                     # Treat as zero
                     imag_part = Decimal(0)
                 else:
-                    raise CalculatorError(
-                        f"Precision too low for this calculation. Please increase precision to at least {self.precision + 2} decimal places."
-                    )
+                    raise PrecisionError(self.precision, self.precision + 2, is_generic=False)
             else:
                 if b >= 0:
                     imag_part = imag_value.sqrt()
                 else:
                     imag_part = -imag_value.sqrt()
         except decimal.InvalidOperation as e:
-            raise CalculatorError(
-                f"Calculation error with current precision ({self.precision}). "
-                f"Please increase precision to at least {max(10, self.precision + 5)} decimal places for this calculation."
-            )
+            raise PrecisionError(self.precision, max(10, self.precision + 5), is_generic=True)
 
         return real_part, imag_part
 
