@@ -1,0 +1,186 @@
+name: Build and Release
+
+on:
+  workflow_dispatch:
+    inputs:
+      version:
+        description: 'Release version (e.g., v0.1.0)'
+        required: true
+        type: string
+      prerelease:
+        description: 'Mark as pre-release'
+        required: false
+        type: boolean
+        default: false
+
+jobs:
+  build-linux:
+    name: Build Linux Executable
+    runs-on: ubuntu-latest
+    permissions:
+      contents: read
+    
+    steps:
+    - name: Checkout code
+      uses: actions/checkout@v4
+      
+    - name: Set up Python
+      uses: actions/setup-python@v5
+      with:
+        python-version: '3.12'
+        
+    - name: Set up uv
+      uses: astral-sh/setup-uv@v3
+      with:
+        enable-cache: true
+        cache-dependency-glob: "pyproject.toml"
+        
+    - name: Install dependencies with uv
+      run: uv sync --dev
+        
+    - name: Build Linux executable with PyInstaller
+      run: |
+        uv run pyinstaller square_root_calculator.spec
+        
+    - name: Create archive
+      run: |
+        cd dist
+        tar -czf SquareRootCalculator-Linux-x86_64.tar.gz SquareRootCalculator
+        
+    - name: Upload Linux executable
+      uses: actions/upload-artifact@v4
+      with:
+        name: linux-executable
+        path: dist/SquareRootCalculator-Linux-x86_64.tar.gz
+        retention-days: 1
+
+  build-windows:
+    name: Build Windows Executable
+    runs-on: windows-latest
+    permissions:
+      contents: read
+    
+    steps:
+    - name: Checkout code
+      uses: actions/checkout@v4
+      
+    - name: Set up Python
+      uses: actions/setup-python@v5
+      with:
+        python-version: '3.12'
+        
+    - name: Set up uv
+      uses: astral-sh/setup-uv@v3
+      with:
+        enable-cache: true
+        cache-dependency-glob: "pyproject.toml"
+      
+    - name: Install dependencies with uv
+      run: uv sync --dev
+        
+    - name: Build Windows executable with PyInstaller
+      run: uv run pyinstaller square_root_calculator.spec
+        
+    - name: Create archive
+      run: |
+        cd dist
+        Compress-Archive -Path SquareRootCalculator.exe -DestinationPath SquareRootCalculator-Windows-x86_64.zip
+        
+    - name: Upload Windows executable
+      uses: actions/upload-artifact@v4
+      with:
+        name: windows-executable
+        path: dist/SquareRootCalculator-Windows-x86_64.zip
+        retention-days: 1
+
+  create-release:
+    name: Create GitHub Release
+    needs: [build-linux, build-windows]
+    runs-on: ubuntu-latest
+    permissions:
+      contents: write
+    
+    steps:
+    - name: Checkout code
+      uses: actions/checkout@v4
+      with:
+        fetch-depth: 0
+        
+    - name: Download Linux executable
+      uses: actions/download-artifact@v4
+      with:
+        name: linux-executable
+        path: ./artifacts
+        
+    - name: Download Windows executable
+      uses: actions/download-artifact@v4
+      with:
+        name: windows-executable
+        path: ./artifacts
+        
+    - name: Generate release notes
+      id: release_notes
+      run: |
+        echo "## Square Root Calculator ${{ inputs.version }}" > release_notes.md
+        echo "" >> release_notes.md
+        echo "### Downloads" >> release_notes.md
+        echo "" >> release_notes.md
+        echo "- **Linux (x86_64)**: SquareRootCalculator-Linux-x86_64.tar.gz" >> release_notes.md
+        echo "- **Windows (x86_64)**: SquareRootCalculator-Windows-x86_64.zip" >> release_notes.md
+        echo "" >> release_notes.md
+        echo "### Installation" >> release_notes.md
+        echo "" >> release_notes.md
+        echo "#### Linux" >> release_notes.md
+        echo '```bash' >> release_notes.md
+        echo 'tar -xzf SquareRootCalculator-Linux-x86_64.tar.gz' >> release_notes.md
+        echo './SquareRootCalculator' >> release_notes.md
+        echo '```' >> release_notes.md
+        echo "" >> release_notes.md
+        echo "#### Windows" >> release_notes.md
+        echo "1. Extract the ZIP file" >> release_notes.md
+        echo "2. Run SquareRootCalculator.exe" >> release_notes.md
+        echo "" >> release_notes.md
+        echo "### Features" >> release_notes.md
+        echo "" >> release_notes.md
+        echo "- Real number square root calculations" >> release_notes.md
+        echo "- Complex number support" >> release_notes.md
+        echo "- Arbitrary precision (1-1000 decimal places)" >> release_notes.md
+        echo "- Multilingual interface (English/Russian)" >> release_notes.md
+        echo "- Calculation history" >> release_notes.md
+        echo "- Multiple output formats (decimal, scientific, fraction)" >> release_notes.md
+        echo "" >> release_notes.md
+        echo "### Requirements" >> release_notes.md
+        echo "" >> release_notes.md
+        echo "- Linux: No additional dependencies required" >> release_notes.md
+        echo "- Windows: No additional dependencies required" >> release_notes.md
+        echo "" >> release_notes.md
+        if [ "${{ inputs.prerelease }}" = "true" ]; then
+          echo "⚠️ **This is a pre-release version and may contain bugs.**" >> release_notes.md
+          echo "" >> release_notes.md
+        fi
+        echo "### Changes" >> release_notes.md
+        echo "" >> release_notes.md
+        
+        # Try to get commits since last tag
+        LAST_TAG=$(git describe --tags --abbrev=0 2>/dev/null || echo "")
+        if [ -n "$LAST_TAG" ]; then
+          echo "Changes since $LAST_TAG:" >> release_notes.md
+          echo "" >> release_notes.md
+          git log ${LAST_TAG}..HEAD --pretty=format:"- %s" >> release_notes.md
+        else
+          echo "Initial release" >> release_notes.md
+        fi
+        
+    - name: Create Release
+      uses: softprops/action-gh-release@v2
+      with:
+        tag_name: ${{ inputs.version }}
+        name: Release ${{ inputs.version }}
+        body_path: release_notes.md
+        prerelease: ${{ inputs.prerelease }}
+        files: |
+          ./artifacts/SquareRootCalculator-Linux-x86_64.tar.gz
+          ./artifacts/SquareRootCalculator-Windows-x86_64.zip
+        draft: false
+      env:
+        GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}

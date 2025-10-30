@@ -4,7 +4,46 @@
 
 Комплексный кроссплатформенный калькулятор квадратного корня с поддержкой действительных чисел, комплексных чисел и произвольной точности вычислений.
 
-![Расширенное приложение](https://github.com/user-attachments/assets/1c317290-cf4e-4c9a-8024-8497b292c0fd)
+## Скриншоты
+
+### Начальный интерфейс
+<div align="center">
+  <img src="docs/screenshots/screenshot_01_initial_english.png" alt="Начальный интерфейс (английский)" width="600"/>
+  <p><i>Начальный интерфейс на английском языке</i></p>
+</div>
+
+### Многоязычная поддержка
+<div align="center">
+  <img src="docs/screenshots/screenshot_02_russian.png" alt="Русский интерфейс" width="600"/>
+  <p><i>Интерфейс на русском языке</i></p>
+</div>
+
+### Вычисления с действительными числами
+<div align="center">
+  <img src="docs/screenshots/screenshot_03_real_calculation.png" alt="Квадратный корень из 2" width="600"/>
+  <p><i>Вычисление √2 с точностью 30 знаков после запятой</i></p>
+</div>
+
+<div align="center">
+  <img src="docs/screenshots/screenshot_04_large_number.png" alt="Вычисление больших чисел" width="600"/>
+  <p><i>Вычисление квадратного корня из больших чисел (123,456,789)</i></p>
+</div>
+
+### Поддержка комплексных чисел
+<div align="center">
+  <img src="docs/screenshots/screenshot_05_complex_mode.png" alt="Режим комплексных чисел" width="600"/>
+  <p><i>Интерфейс режима комплексных чисел</i></p>
+</div>
+
+<div align="center">
+  <img src="docs/screenshots/screenshot_06_complex_calculation.png" alt="Вычисление комплексных чисел" width="600"/>
+  <p><i>Вычисление √(3+4i) = 2+1i</i></p>
+</div>
+
+<div align="center">
+  <img src="docs/screenshots/screenshot_07_negative_complex.png" alt="Квадратный корень из -1" width="600"/>
+  <p><i>Вычисление √(-1) = i в режиме комплексных чисел</i></p>
+</div>
 
 ## Возможности
 
