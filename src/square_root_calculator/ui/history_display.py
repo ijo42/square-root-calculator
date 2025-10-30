@@ -52,7 +52,11 @@ class HistoryDisplayManager:
         
         for entry in entries:
             mode = self.translator.get('complex_mode') if entry.is_complex else self.translator.get('real_mode')
-            item_text = f"{entry.timestamp.strftime('%H:%M:%S')} | {mode} | √({entry.input_value}) ≈ {entry.result_value[:20]}..."
+            # Only add "..." if the result is actually truncated
+            result_display = entry.result_value[:20]
+            if len(entry.result_value) > 20:
+                result_display += "..."
+            item_text = f"{entry.timestamp.strftime('%H:%M:%S')} | {mode} | √({entry.input_value}) ≈ {result_display}"
             
             item = QListWidgetItem(item_text)
             item.setData(1, entry)  # Store entry object for later retrieval

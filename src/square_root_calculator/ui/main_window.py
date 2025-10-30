@@ -127,6 +127,19 @@ class MainWindow(QMainWindow):
         # Precision control with slider
         precision_group = QGroupBox()
         self.precision_group = precision_group
+        # Add contrasting style for group box title
+        precision_group.setStyleSheet("""
+            QGroupBox {
+                font-weight: bold;
+                font-size: 13px;
+                color: #000000;
+            }
+            QGroupBox::title {
+                subcontrol-origin: margin;
+                subcontrol-position: top left;
+                padding: 2px 5px;
+            }
+        """)
         precision_layout = QVBoxLayout()
         
         # Precision value display
@@ -154,7 +167,7 @@ class MainWindow(QMainWindow):
         slider_layout.addWidget(QLabel('200'))
         precision_layout.addLayout(slider_layout)
         
-        # SpinBox for precise input (hidden by default)
+        # SpinBox for precise input (shown by default now)
         self.spinbox_layout = QHBoxLayout()
         spinbox_label = QLabel()
         self.spinbox_label = spinbox_label
@@ -168,8 +181,8 @@ class MainWindow(QMainWindow):
         self.spinbox_layout.addStretch()
         precision_layout.addLayout(self.spinbox_layout)
         
-        # Hide spinbox by default if setting is False
-        if not self.settings.get('show_exact_precision', False):
+        # Show spinbox by default (changed from False to True)
+        if not self.settings.get('show_exact_precision', True):
             self.spinbox_label.hide()
             self.precision_spinbox.hide()
         
@@ -196,6 +209,19 @@ class MainWindow(QMainWindow):
         # Result display with better formatting
         result_group = QGroupBox()
         self.result_group = result_group
+        # Add contrasting style for group box title
+        result_group.setStyleSheet("""
+            QGroupBox {
+                font-weight: bold;
+                font-size: 13px;
+                color: #000000;
+            }
+            QGroupBox::title {
+                subcontrol-origin: margin;
+                subcontrol-position: top left;
+                padding: 2px 5px;
+            }
+        """)
         result_layout = QVBoxLayout()
         
         self.result_display = QTextEdit()
@@ -217,6 +243,19 @@ class MainWindow(QMainWindow):
         # History panel
         history_group = QGroupBox()
         self.history_group = history_group
+        # Add contrasting style for group box title
+        history_group.setStyleSheet("""
+            QGroupBox {
+                font-weight: bold;
+                font-size: 13px;
+                color: #000000;
+            }
+            QGroupBox::title {
+                subcontrol-origin: margin;
+                subcontrol-position: top left;
+                padding: 2px 5px;
+            }
+        """)
         history_layout = QVBoxLayout()
         
         self.history_list = QListWidget()
