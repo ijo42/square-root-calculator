@@ -131,6 +131,7 @@ class MainWindow(QMainWindow):
         real_input_layout = QHBoxLayout()
         self.input_label = QLabel()
         self.input_label.setMinimumWidth(self.LABEL_MIN_WIDTH)
+        self.input_label.setStyleSheet("font-size: 14px;")
         real_input_layout.addWidget(self.input_label)
         real_input_layout.addStretch()
         self.input_field = QLineEdit()
@@ -138,6 +139,7 @@ class MainWindow(QMainWindow):
         self.input_field.setMinimumWidth(self.INPUT_MIN_WIDTH)
         self.input_field.setMaximumWidth(self.INPUT_MIN_WIDTH)
         self.input_field.setAlignment(Qt.AlignmentFlag.AlignRight)
+        self.input_field.setStyleSheet("font-size: 14px;")
         real_input_layout.addWidget(self.input_field)
         real_layout.addLayout(real_input_layout)
         real_layout.addStretch()
@@ -152,6 +154,7 @@ class MainWindow(QMainWindow):
         real_row = QHBoxLayout()
         self.real_part_label = QLabel()
         self.real_part_label.setMinimumWidth(self.LABEL_MIN_WIDTH)
+        self.real_part_label.setStyleSheet("font-size: 14px;")
         real_row.addWidget(self.real_part_label)
         real_row.addStretch()
         self.real_part_field = QLineEdit()
@@ -159,12 +162,14 @@ class MainWindow(QMainWindow):
         self.real_part_field.setMinimumWidth(self.INPUT_MIN_WIDTH)
         self.real_part_field.setMaximumWidth(self.INPUT_MIN_WIDTH)
         self.real_part_field.setAlignment(Qt.AlignmentFlag.AlignRight)
+        self.real_part_field.setStyleSheet("font-size: 14px;")
         real_row.addWidget(self.real_part_field)
         complex_layout.addLayout(real_row)
 
         imag_row = QHBoxLayout()
         self.imag_part_label = QLabel()
         self.imag_part_label.setMinimumWidth(self.LABEL_MIN_WIDTH)
+        self.imag_part_label.setStyleSheet("font-size: 14px;")
         imag_row.addWidget(self.imag_part_label)
         imag_row.addStretch()
         self.imag_part_field = QLineEdit()
@@ -172,6 +177,7 @@ class MainWindow(QMainWindow):
         self.imag_part_field.setMinimumWidth(self.INPUT_MIN_WIDTH)
         self.imag_part_field.setMaximumWidth(self.INPUT_MIN_WIDTH)
         self.imag_part_field.setAlignment(Qt.AlignmentFlag.AlignRight)
+        self.imag_part_field.setStyleSheet("font-size: 14px;")
         imag_row.addWidget(self.imag_part_field)
         complex_layout.addLayout(imag_row)
         complex_layout.addStretch()
@@ -181,12 +187,12 @@ class MainWindow(QMainWindow):
         # Buttons
         button_layout = QHBoxLayout()
         self.calculate_button = QPushButton()
-        self.calculate_button.setStyleSheet("font-size: 14px; padding: 8px;")
+        self.calculate_button.setStyleSheet("font-size: 16px; padding: 10px;")
         self.calculate_button.clicked.connect(self.calculate)
         button_layout.addWidget(self.calculate_button)
 
         self.clear_button = QPushButton()
-        self.clear_button.setStyleSheet("font-size: 14px; padding: 8px;")
+        self.clear_button.setStyleSheet("font-size: 16px; padding: 10px;")
         self.clear_button.clicked.connect(self.clear_fields)
         button_layout.addWidget(self.clear_button)
 
@@ -203,10 +209,11 @@ class MainWindow(QMainWindow):
         # Precision value display
         precision_value_layout = QHBoxLayout()
         self.precision_label = QLabel()
+        self.precision_label.setStyleSheet("font-size: 14px;")
         precision_value_layout.addWidget(self.precision_label)
         initial_precision = self.settings.get("precision", 4)
         self.precision_value_label = QLabel(str(initial_precision))
-        self.precision_value_label.setStyleSheet("font-weight: bold; font-size: 14px;")
+        self.precision_value_label.setStyleSheet("font-weight: bold; font-size: 16px;")
         precision_value_layout.addWidget(self.precision_value_label)
         precision_value_layout.addStretch()
         self.precision_value_layout = precision_value_layout
@@ -225,18 +232,20 @@ class MainWindow(QMainWindow):
         self.precision_slider.valueChanged.connect(self.precision_slider_changed)
         self.slider_layout.addWidget(self.precision_slider)
         self.slider_max_label = QLabel("200")
-        self.slider_layout.addWidget(self.slider_max_label)
+        self.slider_max_label.setStyleSheet("font-size: 13px;")
         precision_layout.addLayout(self.slider_layout)
 
         # SpinBox for precise input
         self.spinbox_layout = QHBoxLayout()
         spinbox_label = QLabel()
+        spinbox_label.setStyleSheet("font-size: 14px;")
         self.spinbox_label = spinbox_label
         self.spinbox_layout.addWidget(spinbox_label)
         self.precision_spinbox = QSpinBox()
         self.precision_spinbox.setMinimum(1)
         self.precision_spinbox.setMaximum(1000)
         self.precision_spinbox.setValue(initial_precision)
+        self.precision_spinbox.setStyleSheet("font-size: 14px;")
         self.precision_spinbox.valueChanged.connect(self.precision_spinbox_changed)
         self.spinbox_layout.addWidget(self.precision_spinbox)
         self.spinbox_layout.addStretch()
@@ -279,7 +288,7 @@ class MainWindow(QMainWindow):
             """
             QTextEdit {
                 font-family: 'Courier New', monospace;
-                font-size: 12px;
+                font-size: 14px;
                 padding: 10px;
             }
         """
@@ -299,7 +308,7 @@ class MainWindow(QMainWindow):
             """
             QListWidget {
                 font-family: 'Courier New', monospace;
-                font-size: 11px;
+                font-size: 14px;
             }
         """
         )
@@ -502,7 +511,7 @@ class MainWindow(QMainWindow):
         groupbox_style = f"""
             QGroupBox {{
                 font-weight: bold;
-                font-size: 13px;
+                font-size: 14px;
                 padding-top: 15px;
             }}
             QGroupBox::title {{
@@ -695,7 +704,7 @@ class MainWindow(QMainWindow):
         self.result_display.clear()
 
         # Build HTML output
-        output = "<div style='font-family: Courier New; font-size: 12px;'>"
+        output = "<div style='font-family: Courier New; font-size: 13px;'>"
 
         # Input
         output += f"<p style='margin: 5px 0;'><b>{self.translator.get('input_label')}</b> {result.input_value}</p>"
