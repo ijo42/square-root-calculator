@@ -6,9 +6,9 @@ from pathlib import Path
 
 def get_version() -> str:
     """Get version from pyproject.toml.
-    
+
     Загрузить версию из pyproject.toml.
-    
+
     Returns:
         Version string
         Строка версии
@@ -17,7 +17,7 @@ def get_version() -> str:
         # Try to find pyproject.toml
         # Start from this file's directory and go up
         current_dir = Path(__file__).parent
-        
+
         # Go up to find pyproject.toml (should be 2 levels up from src/square_root_calculator)
         for _ in range(5):  # Try up to 5 levels up
             pyproject_path = current_dir / "pyproject.toml"
@@ -36,10 +36,9 @@ def get_version() -> str:
             current_dir = current_dir.parent
     except Exception:
         pass
-    
+
     # Fallback version if pyproject.toml not found
-    return "0.2.0"
+    return "0.0.0"
 
 
 __version__ = get_version()
-
