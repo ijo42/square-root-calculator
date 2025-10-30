@@ -359,29 +359,8 @@ class MainWindow(QMainWindow):
 
         # Language menu
         self.language_menu = menubar.addMenu("Language")
-
-        self.english_action = QAction("English", self)
-        self.english_action.setCheckable(True)
-        self.english_action.setChecked(self.settings.get("language") == "en")
-        self.english_action.triggered.connect(
-            lambda: self.change_language_from_menu("en")
-        )
-        self.language_menu.addAction(self.english_action)
-
-        self.russian_action = QAction("Русский", self)
-        self.russian_action.setCheckable(True)
-        self.russian_action.setChecked(self.settings.get("language") == "ru")
-        self.russian_action.triggered.connect(
-            lambda: self.change_language_from_menu("ru")
-        )
-        self.language_menu.addAction(self.russian_action)
-        
-        self.language_menu.addSeparator()
-        
-        # Reload translations action
-        self.reload_translations_action = QAction("Reload Translations", self)
-        self.reload_translations_action.triggered.connect(self.reload_translations)
-        self.language_menu.addAction(self.reload_translations_action)
+        self.language_actions = {}
+        self.build_language_menu()
 
         # Help menu
         self.help_menu = menubar.addMenu("Help")
@@ -445,12 +424,44 @@ class MainWindow(QMainWindow):
             self.translator.get("show_negative_roots")
         )
         self.language_menu.setTitle(self.translator.get("language_menu"))
-        self.reload_translations_action.setText(self.translator.get("reload_translations"))
         self.help_menu.setTitle(self.translator.get("help"))
         self.user_manual_action.setText(self.translator.get("user_manual"))
         self.check_updates_action.setText(self.translator.get("check_updates"))
         self.about_action.setText(self.translator.get("about"))
         self.help_action.setText(self.translator.get("help"))
+
+    def build_language_menu(self):
+        """Build language menu with all available languages.
+        
+        Построить меню языков со всеми доступными языками.
+        """
+        # Clear existing actions
+        self.language_menu.clear()
+        self.language_actions.clear()
+        
+        # Get all available languages
+        available_languages = self.translator.get_available_languages()
+        current_language = self.settings.get("language", "en")
+        
+        # Create action for each language
+        for lang_code, lang_name in available_languages:
+            action = QAction(lang_name, self)
+            action.setCheckable(True)
+            action.setChecked(lang_code == current_language)
+            # Use a lambda with default argument to capture lang_code
+            action.triggered.connect(
+                lambda checked, code=lang_code: self.change_language_from_menu(code)
+            )
+            self.language_menu.addAction(action)
+            self.language_actions[lang_code] = action
+        
+        # Add separator and reload option
+        self.language_menu.addSeparator()
+        self.reload_translations_action = QAction(
+            self.translator.get("reload_translations"), self
+        )
+        self.reload_translations_action.triggered.connect(self.reload_translations)
+        self.language_menu.addAction(self.reload_translations_action)
 
     def change_language_from_menu(self, language_code):
         """Handle language change from menu."""
@@ -458,8 +469,8 @@ class MainWindow(QMainWindow):
         self.settings.set("language", language_code)
 
         # Update menu checkmarks
-        self.english_action.setChecked(language_code == "en")
-        self.russian_action.setChecked(language_code == "ru")
+        for code, action in self.language_actions.items():
+            action.setChecked(code == language_code)
 
         self.update_ui_text()
 
@@ -820,6 +831,13 @@ class MainWindow(QMainWindow):
             return
 
         if has_update and version:
+            # Check if user has skipped this version
+            skipped_updates = self.settings.get("skipped_updates", [])
+            if version in skipped_updates and not self._manual_check:
+                # User previously skipped this version, don't show again
+                self._manual_check = False
+                return
+            
             message = self.translator.get("update_message").format(version, __version__)
             
             # Create message box with custom buttons
@@ -844,6 +862,11 @@ class MainWindow(QMainWindow):
             if msgBox.clickedButton() == download_button:
                 download_url = self.translator.get("download_url")
                 QDesktopServices.openUrl(QUrl(download_url))
+            elif msgBox.clickedButton() == skip_button:
+                # Save skipped version
+                if version not in skipped_updates:
+                    skipped_updates.append(version)
+                    self.settings.set("skipped_updates", skipped_updates)
         elif self._manual_check:
             # Only show "no update" if manually checked
             QMessageBox.information(
@@ -857,6 +880,7 @@ class MainWindow(QMainWindow):
     def reload_translations(self):
         """Reload custom translations from JSON files."""
         self.translator.reload_translations()
+        self.build_language_menu()  # Rebuild menu to include any new languages
         self.update_ui_text()
         QMessageBox.information(
             self,

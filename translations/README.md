@@ -6,7 +6,8 @@ This folder allows you to add custom translations or override existing translati
 
 1. Create a JSON file with the language code as the filename (e.g., `de.json` for German, `fr.json` for French)
 2. Add translation keys and values in JSON format
-3. Restart the application or use **Language → Reload Translations** to load the new translations
+3. **Important**: Include the `_language_name` key to specify how your language appears in the menu
+4. Restart the application or use **Language → Reload Translations** to load the new translations
 
 ## File Format
 
@@ -14,10 +15,14 @@ The JSON file should contain key-value pairs where:
 - **Key**: Translation identifier (e.g., `app_title`, `calculate_button`)
 - **Value**: Translated text in your language
 
+**Special Key:**
+- `_language_name` - The display name of your language in the Language menu (e.g., "Deutsch", "Français")
+
 ### Example: German Translation (`de.json`)
 
 ```json
 {
+  "_language_name": "Deutsch",
   "app_title": "Quadratwurzel-Rechner",
   "calculate_button": "Berechnen",
   "clear_button": "Löschen",
@@ -30,6 +35,9 @@ The JSON file should contain key-value pairs where:
 ## Available Translation Keys
 
 Here are the main translation keys you can customize:
+
+### Special Keys
+- `_language_name` - **Required**: Display name of the language in the menu
 
 ### Application
 - `app_title` - Application window title

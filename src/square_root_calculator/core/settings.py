@@ -23,6 +23,7 @@ class Settings:
         "show_exact_precision": False,
         "show_negative_roots": False,
         "language": "en",
+        "skipped_updates": [],  # List of version numbers that user chose to skip
     }
 
     def __init__(self):
