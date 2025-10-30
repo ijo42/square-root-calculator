@@ -1,6 +1,6 @@
 [project]
 name = "square-root-calculator"
-version = "0.1.0"
+version = "0.2.0"
 description = "A comprehensive square root calculator with support for real numbers, complex numbers, and arbitrary precision"
 readme = "README.md"
 requires-python = ">=3.12"
