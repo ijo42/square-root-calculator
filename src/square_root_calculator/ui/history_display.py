@@ -103,7 +103,7 @@ class HistoryDisplayManager:
             result_display = entry.result_text[:20]
             if len(entry.result_text) > 20:
                 result_display += "..."
-            item_text = f"{entry.timestamp.strftime('%H:%M:%S')} | √({entry.input_value}) ≈ {result_display}"
+            item_text = f"√({entry.input_value}) ≈ {result_display}"
 
             item = QListWidgetItem(item_text)
             item.setData(1, entry)  # Store entry object for later retrieval
