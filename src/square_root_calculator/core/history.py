@@ -13,7 +13,16 @@ class HistoryEntry:
     Одна запись истории.
     """
 
-    def __init__(self, input_value: str, result_text: str, timestamp: datetime = None):
+    def __init__(
+        self,
+        input_value: str,
+        result_text: str,
+        timestamp: datetime = None,
+        precision: int = None,
+        is_complex: bool = False,
+        real_part: str = None,
+        imag_part: str = None,
+    ):
         """Initialize history entry.
 
         Инициализировать запись истории.
@@ -25,10 +34,22 @@ class HistoryEntry:
                         Форматированный текст результата
             timestamp: When the calculation was performed
                       Когда было выполнено вычисление
+            precision: Precision used for calculation
+                      Точность, использованная для вычисления
+            is_complex: Whether this was a complex calculation
+                       Было ли это вычисление в комплексном режиме
+            real_part: Real part for complex numbers
+                      Действительная часть для комплексных чисел
+            imag_part: Imaginary part for complex numbers
+                      Мнимая часть для комплексных чисел
         """
         self.input_value = input_value
         self.result_text = result_text
         self.timestamp = timestamp or datetime.now()
+        self.precision = precision
+        self.is_complex = is_complex
+        self.real_part = real_part
+        self.imag_part = imag_part
 
     def to_dict(self) -> dict:
         """Convert to dictionary.
@@ -76,7 +97,15 @@ class HistoryManager:
         self.max_entries = max_entries
         self.entries: List[HistoryEntry] = []
 
-    def add_entry(self, input_value: str, result_text: str):
+    def add_entry(
+        self,
+        input_value: str,
+        result_text: str,
+        precision: int = None,
+        is_complex: bool = False,
+        real_part: str = None,
+        imag_part: str = None,
+    ):
         """Add a new entry to history.
 
         Добавить новую запись в историю.
@@ -86,8 +115,18 @@ class HistoryManager:
                         Входное значение
             result_text: Result text
                         Текст результата
+            precision: Precision used for calculation
+                      Точность, использованная для вычисления
+            is_complex: Whether this was a complex calculation
+                       Было ли это вычисление в комплексном режиме
+            real_part: Real part for complex numbers
+                      Действительная часть для комплексных чисел
+            imag_part: Imaginary part for complex numbers
+                      Мнимая часть для комплексных чисел
         """
-        entry = HistoryEntry(input_value, result_text)
+        entry = HistoryEntry(
+            input_value, result_text, precision=precision, is_complex=is_complex, real_part=real_part, imag_part=imag_part
+        )
         self.entries.insert(0, entry)  # Add to beginning
 
         # Keep only max_entries

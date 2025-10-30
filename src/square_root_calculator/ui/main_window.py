@@ -178,8 +178,9 @@ class MainWindow(QMainWindow):
         precision_layout.addLayout(precision_value_layout)
 
         # Slider for quick adjustment
-        slider_layout = QHBoxLayout()
-        slider_layout.addWidget(QLabel("1"))
+        self.slider_layout = QHBoxLayout()
+        self.slider_min_label = QLabel("1")
+        self.slider_layout.addWidget(self.slider_min_label)
         self.precision_slider = QSlider(Qt.Orientation.Horizontal)
         self.precision_slider.setMinimum(1)
         self.precision_slider.setMaximum(200)
@@ -187,11 +188,12 @@ class MainWindow(QMainWindow):
         self.precision_slider.setTickPosition(QSlider.TickPosition.TicksBelow)
         self.precision_slider.setTickInterval(20)
         self.precision_slider.valueChanged.connect(self.precision_slider_changed)
-        slider_layout.addWidget(self.precision_slider)
-        slider_layout.addWidget(QLabel("200"))
-        precision_layout.addLayout(slider_layout)
+        self.slider_layout.addWidget(self.precision_slider)
+        self.slider_max_label = QLabel("200")
+        self.slider_layout.addWidget(self.slider_max_label)
+        precision_layout.addLayout(self.slider_layout)
 
-        # SpinBox for precise input (shown by default now)
+        # SpinBox for precise input
         self.spinbox_layout = QHBoxLayout()
         spinbox_label = QLabel()
         self.spinbox_label = spinbox_label
@@ -205,8 +207,16 @@ class MainWindow(QMainWindow):
         self.spinbox_layout.addStretch()
         precision_layout.addLayout(self.spinbox_layout)
 
-        # Show spinbox by default (changed from False to True)
-        if not self.settings.get("show_exact_precision", True):
+        # Show either slider or spinbox (mutually exclusive)
+        # Default to showing slider only
+        show_exact = self.settings.get("show_exact_precision", False)
+        if show_exact:
+            # Show spinbox, hide slider
+            self.slider_min_label.hide()
+            self.precision_slider.hide()
+            self.slider_max_label.hide()
+        else:
+            # Show slider, hide spinbox
             self.spinbox_label.hide()
             self.precision_spinbox.hide()
 
@@ -297,7 +307,8 @@ class MainWindow(QMainWindow):
             }
         """
         )
-        self.history_list.itemClicked.connect(self.history_item_clicked)
+        # Change from itemClicked to itemDoubleClicked
+        self.history_list.itemDoubleClicked.connect(self.history_item_double_clicked)
         history_layout.addWidget(self.history_list)
 
         self.clear_history_button = QPushButton()
@@ -471,16 +482,24 @@ class MainWindow(QMainWindow):
         self.result_display.setStyleSheet(output_style)
 
     def toggle_exact_precision(self):
-        """Toggle visibility of exact precision spinbox."""
+        """Toggle between slider and exact precision spinbox (mutually exclusive)."""
         show = self.show_exact_precision_action.isChecked()
         self.settings.set("show_exact_precision", show)
 
         if show:
+            # Show spinbox, hide slider
             self.spinbox_label.show()
             self.precision_spinbox.show()
+            self.slider_min_label.hide()
+            self.precision_slider.hide()
+            self.slider_max_label.hide()
         else:
+            # Show slider, hide spinbox
             self.spinbox_label.hide()
             self.precision_spinbox.hide()
+            self.slider_min_label.show()
+            self.precision_slider.show()
+            self.slider_max_label.show()
 
     def toggle_negative_roots(self):
         """Toggle showing negative roots."""
@@ -518,8 +537,43 @@ class MainWindow(QMainWindow):
         except Exception as e:
             self.show_error(str(e))
 
-    def calculate(self):
-        """Perform calculation based on current mode."""
+    def normalize_number_input(self, text: str) -> str:
+        """Normalize number input by replacing comma with dot and validating.
+        
+        Нормализовать числовой ввод, заменяя запятую на точку и проверяя.
+        
+        Args:
+            text: Input text to normalize
+            
+        Returns:
+            Normalized number string
+            
+        Raises:
+            InvalidInputError: If input contains invalid characters
+        """
+        if not text:
+            return text
+            
+        # Replace comma with dot for decimal separator
+        normalized = text.replace(",", ".")
+        
+        # Check for invalid characters (allow digits, dot, minus, plus, and 'i' for complex)
+        import re
+        # Allow: digits, dot, minus, plus, 'i' character, and whitespace
+        if not re.match(r'^[0-9.,\-+i\s]+$', text):
+            raise InvalidInputError(
+                self.translator.get("invalid_input") + ": " + 
+                self.translator.get("text_instead_of_numbers")
+            )
+        
+        return normalized
+
+    def calculate(self, from_history=False):
+        """Perform calculation based on current mode.
+        
+        Args:
+            from_history: Whether this calculation is from history recall (don't add to history again)
+        """
         try:
             # Check which tab is active
             if self.mode_tabs.currentIndex() == 0:
@@ -527,18 +581,24 @@ class MainWindow(QMainWindow):
                 value = self.input_field.text().strip()
                 if not value:
                     raise InvalidInputError(self.translator.get("invalid_input"))
+                # Normalize input (handle comma as decimal separator)
+                value = self.normalize_number_input(value)
                 result = self.calculator.calculate(value)
             else:
                 # Complex mode
                 real_str = self.real_part_field.text().strip() or "0"
                 imag_str = self.imag_part_field.text().strip() or "0"
+                # Normalize inputs
+                real_str = self.normalize_number_input(real_str)
+                imag_str = self.normalize_number_input(imag_str)
                 result = self.calculator.calculate(None, real_str, imag_str)
 
             # Display unified result
             self.display_result(result)
 
-            # Add to history
-            self.add_to_history(result)
+            # Add to history only if not from history recall
+            if not from_history:
+                self.add_to_history(result)
 
         except InvalidInputError as e:
             self.show_error(str(e))
@@ -604,20 +664,56 @@ class MainWindow(QMainWindow):
         """Update history list widget."""
         self.history_display.update_display()
 
-    def history_item_clicked(self, item):
-        """Handle click on history item - display result in result pane."""
+    def history_item_double_clicked(self, item):
+        """Handle double-click on history item - recalculate with same parameters.
+        
+        Обработать двойной клик по элементу истории - пересчитать с теми же параметрами.
+        """
         entry = self.history_display.get_selected_entry()
 
         if entry:
-            # Display in result pane
-            output = "<div style='font-family: Courier New; font-size: 12px;'>"
-            output += f"<p style='margin: 5px 0;'><b>From History:</b></p>"
-            output += f"<p style='margin: 5px 0;'><b>{self.translator.get('input_label')}</b> {entry.input_value}</p>"
-            output += f"<p style='margin: 5px 0; color: #0066cc;'><b>Result:</b> {entry.result_text[:50]}...</p>"
-            output += f"<p style='margin: 5px 0; font-size: 10px;'>Calculated: {entry.timestamp.strftime('%Y-%m-%d %H:%M:%S')}</p>"
-            output += "</div>"
-
-            self.result_display.setHtml(output)
+            # Save current precision
+            current_precision = self.calculator.precision
+            
+            # Set precision from history entry
+            if entry.precision:
+                self.calculator.set_precision(entry.precision)
+                self.precision_value_label.setText(str(entry.precision))
+                if entry.precision <= 200:
+                    self.precision_slider.blockSignals(True)
+                    self.precision_slider.setValue(entry.precision)
+                    self.precision_slider.blockSignals(False)
+                self.precision_spinbox.blockSignals(True)
+                self.precision_spinbox.setValue(entry.precision)
+                self.precision_spinbox.blockSignals(False)
+            
+            # Set mode and input fields from history entry
+            if entry.is_complex:
+                # Switch to complex mode
+                self.mode_tabs.setCurrentIndex(1)
+                # Set real and imaginary parts
+                self.real_part_field.setText(entry.real_part or "0")
+                self.imag_part_field.setText(entry.imag_part or "0")
+            else:
+                # Switch to real mode
+                self.mode_tabs.setCurrentIndex(0)
+                # Set input value
+                self.input_field.setText(entry.input_value)
+            
+            # Perform calculation (from_history=True to not add to history again)
+            self.calculate(from_history=True)
+            
+            # Restore precision if it was different
+            if current_precision != entry.precision and entry.precision:
+                self.calculator.set_precision(current_precision)
+                self.precision_value_label.setText(str(current_precision))
+                if current_precision <= 200:
+                    self.precision_slider.blockSignals(True)
+                    self.precision_slider.setValue(current_precision)
+                    self.precision_slider.blockSignals(False)
+                self.precision_spinbox.blockSignals(True)
+                self.precision_spinbox.setValue(current_precision)
+                self.precision_spinbox.blockSignals(False)
 
     def clear_history(self):
         """Clear calculation history."""

@@ -33,11 +33,44 @@ class HistoryDisplayManager:
         Args:
             result: CalculationResult to add to history
         """
-        # Format the result for display
-        result_text = str(result.roots[0]) if result.roots else "N/A"
+        # Format the result for display (get first root formatted)
+        formatted_roots = result.get_formatted_roots()
+        result_text = formatted_roots[0] if formatted_roots else "N/A"
+
+        # Extract real and imaginary parts for complex mode
+        real_part = None
+        imag_part = None
+        if result.is_complex:
+            # Parse the input_value to extract real and imaginary parts
+            # Format is like "3+4i" or "3-4i" or just "3" or "4i"
+            input_str = result.input_value
+            if "i" in input_str:
+                # Complex input
+                input_str = input_str.replace("i", "")
+                if "+" in input_str:
+                    parts = input_str.split("+")
+                    real_part = parts[0] if parts[0] else "0"
+                    imag_part = parts[1] if len(parts) > 1 else "0"
+                elif "-" in input_str and input_str.index("-") > 0:
+                    parts = input_str.split("-")
+                    real_part = parts[0] if parts[0] else "0"
+                    imag_part = "-" + parts[1] if len(parts) > 1 else "0"
+                else:
+                    # Just imaginary part
+                    real_part = "0"
+                    imag_part = input_str
+            else:
+                # Just real part
+                real_part = input_str
+                imag_part = "0"
 
         self.history.add_entry(
-            input_value=str(result.input_value), result_text=result_text
+            input_value=str(result.input_value),
+            result_text=result_text,
+            precision=result.precision,
+            is_complex=result.is_complex,
+            real_part=real_part,
+            imag_part=imag_part,
         )
         self.update_display()
 
