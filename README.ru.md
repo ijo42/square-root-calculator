@@ -5,43 +5,57 @@
 
 ## Скриншоты
 
+> **Примечание**: Все скриншоты ниже используют тёмную тему. Также доступен [скриншот светлой темы](#светлая-тема).
+
 ### Начальный интерфейс
 <div align="center">
   <img src="docs/screenshots/screenshot_01_initial_english.png" alt="Начальный интерфейс" width="600"/>
-  <p><i>Начальный интерфейс</i></p>
+  <p><i>Начальный интерфейс с английским языком (Тёмная тема)</i></p>
 </div>
 
 ### Многоязычная поддержка
 <div align="center">
   <img src="docs/screenshots/screenshot_02_russian.png" alt="Русский интерфейс" width="600"/>
-  <p><i>Интерфейс на русском языке</i></p>
+  <p><i>Интерфейс на русском языке (Тёмная тема)</i></p>
 </div>
 
 ### Вычисления с действительными числами
 <div align="center">
   <img src="docs/screenshots/screenshot_03_real_calculation.png" alt="Квадратный корень из 2" width="600"/>
-  <p><i>Вычисление √2 с точностью 30 знаков после запятой</i></p>
+  <p><i>Вычисление √2 с точностью 30 знаков после запятой (Тёмная тема)</i></p>
 </div>
 
 <div align="center">
   <img src="docs/screenshots/screenshot_04_large_number.png" alt="Вычисление больших чисел" width="600"/>
-  <p><i>Вычисление квадратного корня из больших чисел (123,456,789)</i></p>
+  <p><i>Вычисление квадратного корня из больших чисел (123,456,789) (Тёмная тема)</i></p>
 </div>
 
 ### Поддержка комплексных чисел
 <div align="center">
   <img src="docs/screenshots/screenshot_05_complex_mode.png" alt="Режим комплексных чисел" width="600"/>
-  <p><i>Интерфейс режима комплексных чисел</i></p>
+  <p><i>Интерфейс режима комплексных чисел (Тёмная тема)</i></p>
 </div>
 
 <div align="center">
   <img src="docs/screenshots/screenshot_06_complex_calculation.png" alt="Вычисление комплексных чисел" width="600"/>
-  <p><i>Вычисление √(3+4i) = 2+1i</i></p>
+  <p><i>Вычисление √(3+4i) = 2+1i (Тёмная тема)</i></p>
 </div>
 
 <div align="center">
   <img src="docs/screenshots/screenshot_07_negative_complex.png" alt="Квадратный корень из -1" width="600"/>
-  <p><i>Вычисление √(-1) = i в режиме комплексных чисел</i></p>
+  <p><i>Вычисление √(-1) = i в режиме комплексных чисел (Тёмная тема)</i></p>
+</div>
+
+### Поддержка пользовательских языков
+<div align="center">
+  <img src="docs/screenshots/screenshot_08_custom_language.png" alt="Пользовательский язык (немецкий)" width="600"/>
+  <p><i>Приложение с загруженным пользовательским немецким переводом (Тёмная тема)</i></p>
+</div>
+
+### Светлая тема
+<div align="center">
+  <img src="docs/screenshots/screenshot_01_initial_light.png" alt="Интерфейс со светлой темой" width="600"/>
+  <p><i>Начальный интерфейс со светлой темой</i></p>
 </div>
 
 ## Возможности

@@ -5,43 +5,57 @@ A comprehensive, cross-platform square root calculator with support for real num
 
 ## Screenshots
 
+> **Note**: All screenshots below use the dark theme. A [light theme screenshot](#light-theme) is also available.
+
 ### Initial Interface
 <div align="center">
   <img src="docs/screenshots/screenshot_01_initial_english.png" alt="Initial Interface (English)" width="600"/>
-  <p><i>Initial interface with English language</i></p>
+  <p><i>Initial interface with English language (Dark Theme)</i></p>
 </div>
 
 ### Multilingual Support
 <div align="center">
   <img src="docs/screenshots/screenshot_02_russian.png" alt="Russian Interface" width="600"/>
-  <p><i>Russian language interface</i></p>
+  <p><i>Russian language interface (Dark Theme)</i></p>
 </div>
 
 ### Real Number Calculations
 <div align="center">
   <img src="docs/screenshots/screenshot_03_real_calculation.png" alt="Square Root of 2" width="600"/>
-  <p><i>Calculating √2 with 30 decimal places precision</i></p>
+  <p><i>Calculating √2 with 30 decimal places precision (Dark Theme)</i></p>
 </div>
 
 <div align="center">
   <img src="docs/screenshots/screenshot_04_large_number.png" alt="Large Number Calculation" width="600"/>
-  <p><i>Computing square root of large numbers (123,456,789)</i></p>
+  <p><i>Computing square root of large numbers (123,456,789) (Dark Theme)</i></p>
 </div>
 
 ### Complex Number Support
 <div align="center">
   <img src="docs/screenshots/screenshot_05_complex_mode.png" alt="Complex Mode" width="600"/>
-  <p><i>Complex number mode interface</i></p>
+  <p><i>Complex number mode interface (Dark Theme)</i></p>
 </div>
 
 <div align="center">
   <img src="docs/screenshots/screenshot_06_complex_calculation.png" alt="Complex Calculation" width="600"/>
-  <p><i>Calculating √(3+4i) = 2+1i</i></p>
+  <p><i>Calculating √(3+4i) = 2+1i (Dark Theme)</i></p>
 </div>
 
 <div align="center">
   <img src="docs/screenshots/screenshot_07_negative_complex.png" alt="Square Root of -1" width="600"/>
-  <p><i>Computing √(-1) = i in complex mode</i></p>
+  <p><i>Computing √(-1) = i in complex mode (Dark Theme)</i></p>
+</div>
+
+### Custom Language Support
+<div align="center">
+  <img src="docs/screenshots/screenshot_08_custom_language.png" alt="Custom Language (German)" width="600"/>
+  <p><i>Application with custom German translation loaded (Dark Theme)</i></p>
+</div>
+
+### Light Theme
+<div align="center">
+  <img src="docs/screenshots/screenshot_01_initial_light.png" alt="Light Theme Interface" width="600"/>
+  <p><i>Initial interface with Light Theme</i></p>
 </div>
 
 ## Features
