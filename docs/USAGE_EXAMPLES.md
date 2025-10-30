@@ -1,189 +1,212 @@
 # Usage Examples
 
-> **English version** | **[Русская версия](USAGE_EXAMPLES.ru.md)**
-
-This document provides detailed examples of using the Square Root Calculator.
+This document provides detailed examples of using the Square Root Calculator for end users.
 
 ## Table of Contents
+- [Getting Started](#getting-started)
 - [Real Number Examples](#real-number-examples)
 - [Complex Number Examples](#complex-number-examples)
-- [High Precision Examples](#high-precision-examples)
-- [Error Handling Examples](#error-handling-examples)
+- [Precision Control](#precision-control)
+- [Custom Translations](#custom-translations)
+- [Tips and Tricks](#tips-and-tricks)
+
+## Getting Started
+
+### First Launch
+
+When you first run the application:
+1. The interface opens in your system's default language (if supported)
+2. Theme is set based on your system preferences (light/dark)
+3. Settings are saved to `~/.square_root_calculator/`
+4. Automatic update check runs in the background
+
+### Basic Interface
+
+The calculator has two main modes accessible via tabs:
+- **Real Numbers**: For calculating square roots of positive real numbers
+- **Complex Numbers**: For calculating square roots of complex numbers (including negative reals)
 
 ## Real Number Examples
 
-### Example 1: Simple Integer Square Root
+### Example 1: Perfect Squares
 **Input:** 16  
 **Precision:** 10  
-**Result:** 4
+**Result:**
+- Positive root: `+√(16) = 4`
+- Negative root: `-√(16) = -4`
 
-This is a perfect square, so the result is an exact integer.
+Perfect squares produce exact integer results.
 
-### Example 2: Irrational Number
+### Example 2: Irrational Numbers
 **Input:** 2  
 **Precision:** 50  
-**Result:** 1.41421356237309504880168872420969807856967187537694...
+**Result:**
+- Positive root: `+√(2) = 1.41421356237309504880168872420969807856967187537694...`
+- Scientific: `1.414213562373095e+00`
+- Fraction: `1414/1000` (approximation)
 
-The square root of 2 is an irrational number that continues infinitely without repeating.
+The calculator displays multiple representations for better understanding.
 
-### Example 3: Large Number
+### Example 3: Large Numbers
 **Input:** 123456789  
 **Precision:** 20  
-**Result:** 11111.11106055555544054166...
+**Result:** `11111.11106055555544054166...`
 
-Even very large numbers can be computed with high precision.
+Even very large numbers can be computed accurately with arbitrary precision.
 
 ### Example 4: Decimal Input
 **Input:** 0.25  
 **Precision:** 10  
-**Result:** 0.5
+**Result:** `0.5`
 
 Decimal inputs work seamlessly.
 
-### Example 5: Scientific Notation
-**Input:** 1e10  
+### Example 5: Very Small Numbers
+**Input:** 0.000001  
 **Precision:** 15  
-**Result:** 100000.000000000000000...
+**Result:** `0.001`
 
-Large numbers in scientific notation are supported.
+The calculator handles numbers of any magnitude.
 
 ## Complex Number Examples
 
-### Example 1: Standard Complex Number
+### Example 1: Simple Complex Number
 **Real Part:** 3  
 **Imaginary Part:** 4  
-**Precision:** 15  
-**Result:** 2+1i
+**Precision:** 10  
+**Result:**
+- Positive root: `2+1i`
+- Negative root: `-2-1i`
 
-This is a classic complex number calculation where √(3+4i) = 2+1i.
+This is the classic example: √(3+4i) = 2+i
 
-### Example 2: Negative Real Number
+### Example 2: Pure Imaginary
+**Real Part:** 0  
+**Imaginary Part:** 4  
+**Precision:** 10  
+**Result:**
+- Positive root: `1.414213562+1.414213562i`
+- Negative root: `-1.414213562-1.414213562i`
+
+Square root of pure imaginary numbers.
+
+### Example 3: Negative Real (√-1)
 **Real Part:** -1  
 **Imaginary Part:** 0  
-**Precision:** 20  
-**Result:** 0+1i
+**Precision:** 10  
+**Result:**
+- Positive root: `0+1i`
+- Negative root: `0-1i`
 
-The square root of -1 is the imaginary unit i, which is represented as 0+1i.
+This demonstrates √(-1) = i, a fundamental result in complex analysis.
 
-### Example 3: Pure Imaginary Number
-**Real Part:** 0  
-**Imaginary Part:** 1  
-**Precision:** 20  
-**Result:** 0.70710678118654752440+0.70710678118654752440i
-
-The square root of i equals (1+i)/√2.
-
-### Example 4: Negative Complex Number
-**Real Part:** -3  
-**Imaginary Part:** -4  
-**Precision:** 15  
-**Result:** 1-2i
-
-Negative complex numbers are fully supported.
-
-### Example 5: Large Complex Number
+### Example 4: Large Complex Numbers
 **Real Part:** 100  
 **Imaginary Part:** 100  
 **Precision:** 15  
-**Result:** 11.0977222864644...+4.5341652313282...i
-
-The calculator handles large complex numbers accurately.
-
-## High Precision Examples
-
-### Example 1: Computing π/2 Approximation
-We can use the fact that √2 ≈ 1.414... to high precision.
-
-**Input:** 2  
-**Precision:** 100  
 **Result:**
+- Positive root: `11.09868411346781+4.50665869232206i`
+
+The calculator handles large complex numbers with ease.
+
+## Precision Control
+
+### Using the Slider
+- Drag the slider to adjust precision from 1 to 200 decimal places
+- Ideal for quick adjustments during exploration
+- Visual feedback shows current precision value
+
+### Using the Spinbox
+- Type exact values from 1 to 1000 decimal places
+- Useful when you need specific precision
+- Press Enter or click Calculate to apply
+
+### Low Precision Warning
+If precision is too low for a calculation, you'll see an error message:
+- **English**: "Precision too low for this calculation. Please increase precision to at least X decimal places."
+- **Russian**: "Точность слишком низкая для данного вычисления. Пожалуйста, увеличьте точность минимум до X знаков после запятой."
+
+Example triggering low precision:
+- Input: 13+i with precision 1
+- Solution: Increase precision to at least 3
+
+## Custom Translations
+
+### Adding a New Language
+
+1. Create `translations` folder in the application directory
+2. Create a JSON file named `{language_code}.json` (e.g., `de.json`)
+3. Add translations with special `_language_name` field:
+
+```json
+{
+  "_language_name": "Deutsch",
+  "app_title": "Quadratwurzel-Rechner",
+  "calculate_button": "Berechnen",
+  "clear_button": "Löschen",
+  "result_label": "Ergebnis"
+}
 ```
-1.4142135623730950488016887242096980785696718753769480731766797379907324784621070388503875343276415727
-```
 
-### Example 2: Golden Ratio Component
-The golden ratio φ = (1+√5)/2. Here's √5 to high precision:
+4. Go to **Language → Reload Translations**
+5. Your new language appears in the Language menu!
 
-**Input:** 5  
-**Precision:** 80  
-**Result:**
-```
-2.23606797749978969640917366873127623544061835961152572427089724541052092563780...
-```
+### Overriding Existing Translations
 
-### Example 3: Very Small Numbers
-**Input:** 0.000001  
-**Precision:** 30  
-**Result:** 0.001000000000000000000000000000
+You can customize English or Russian by creating `en.json` or `ru.json` with only the keys you want to change.
 
-Even very small numbers maintain precision.
+See [translations/README.md](../translations/README.md) for complete documentation.
 
-## Error Handling Examples
+## Tips and Tricks
 
-### Example 1: Negative Number in Real Mode
-**Input:** -5  
-**Mode:** Real Numbers  
-**Result:** Error message displayed
+### Calculation History
+- All calculations are automatically saved in the history panel
+- Scroll through past calculations
+- Use **Clear History** to start fresh
 
-The calculator correctly identifies that negative numbers cannot have real square roots and suggests switching to Complex mode.
+### Theme Selection
+- Go to **Settings → Theme** to choose Light or Dark theme
+- Theme preference is saved and persists across sessions
+- System theme is detected automatically on first launch
 
-### Example 2: Invalid Input
-**Input:** "abc"  
-**Mode:** Real Numbers  
-**Result:** Error message about invalid number format
+### Update Management
+- Automatic update checks happen on startup
+- Manual check: **Help → Check for Updates**
+- Click **Download** to get the latest version
+- Click **Skip** to dismiss the notification (won't show again for that version)
+- Skipped versions are saved in settings
 
-Non-numeric input is caught and reported clearly.
+### Keyboard Shortcuts
+- Press Enter in input fields to calculate
+- Tab between fields for efficient data entry
 
-### Example 3: Empty Input
-**Input:** (empty)  
-**Mode:** Real Numbers  
-**Result:** Error message requesting valid input
-
-The calculator validates that input is provided.
-
-### Example 4: Complex Number with Negative in Real Mode
-If you try to calculate the square root of a negative number in Real mode, the calculator will show an error and suggest switching to Complex mode:
-
-**Error Message:** "Cannot calculate square root of negative real number. Switch to Complex mode."
-
-## Mathematical Background
-
-### Real Numbers
-For a positive real number x, its square root √x is the number y such that y² = x.
-
-### Complex Numbers
-For a complex number z = a + bi, the square root is calculated using:
-- √z = √((|z| + a)/2) + i·sign(b)·√((|z| - a)/2)
-- where |z| = √(a² + b²)
-
-This formula ensures accurate results for all complex numbers, including:
-- Positive real numbers (b = 0, a > 0)
-- Negative real numbers (b = 0, a < 0)
-- Pure imaginary numbers (a = 0)
-- General complex numbers (a ≠ 0, b ≠ 0)
-
-## Tips for Best Results
-
-1. **Choose Appropriate Precision:** Start with 50 decimal places for most calculations. Increase if you need more accuracy.
-
-2. **Use Complex Mode for Negative Numbers:** If your input might be negative, use Complex mode to avoid errors.
-
-3. **Large Numbers:** The calculator can handle very large numbers, but computation time may increase with higher precision.
-
-4. **Validation:** Always check that your input is in the correct format before calculating.
-
-5. **Language Support:** Switch between English and Russian using the language dropdown for your preferred interface.
+### Error Recovery
+If you encounter an error:
+1. Check input format (numbers only, no text)
+2. Try increasing precision
+3. For complex mode, enter real and imaginary parts separately
+4. Use the history to review what worked before
 
 ## Common Use Cases
 
-### Scientific Research
-Use high precision (100+ digits) for scientific calculations requiring extreme accuracy.
+### Scientific Calculations
+Set precision to 50+ for scientific work requiring high accuracy.
 
-### Engineering
-Use moderate precision (20-50 digits) for engineering calculations where standard floating-point accuracy is insufficient.
+### Educational Purposes
+Use lower precision (10-20) to demonstrate concepts without overwhelming detail.
 
-### Education
-Use any precision to demonstrate the properties of irrational numbers, complex numbers, and mathematical concepts.
+### Quick Estimates
+Use the slider at low precision (1-5) for fast approximations.
 
-### Finance
-Use appropriate precision for financial calculations where exact decimal representation is crucial.
+### Exploring Complex Numbers
+Switch to Complex mode to visualize and understand complex square roots.
+
+## Need More Help?
+
+- Check the [Custom Translations Guide](../translations/README.md)
+- Read the [Developer Documentation](DEVELOPMENT.md) if you want to contribute
+- Open an issue on [GitHub Issues](https://github.com/ijo42/square-root-calculator/issues)
+
+---
+
+**[⬆ Back to top](#usage-examples)**
