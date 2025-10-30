@@ -28,21 +28,21 @@ class Translator:
         """
         # Load built-in translations first
         self._load_builtin_translations()
-        
+
         self.language = language if language in self.TRANSLATIONS else "en"
         self.custom_translations_loaded = False
         self.load_custom_translations()
 
     def _load_builtin_translations(self):
         """Load built-in translations from JSON files in locales folder.
-        
+
         Загрузить встроенные переводы из JSON файлов в папке locales.
         """
         locales_dir = Path(__file__).parent
-        
+
         for json_file in locales_dir.glob("*.json"):
             try:
-                with open(json_file, 'r', encoding='utf-8') as f:
+                with open(json_file, "r", encoding="utf-8") as f:
                     translation_data = json.load(f)
                     lang_code = json_file.stem
                     self.TRANSLATIONS[lang_code] = translation_data
@@ -51,7 +51,7 @@ class Translator:
 
     def load_custom_translations(self):
         """Load custom translations from JSON files in translations folder.
-        
+
         Загрузить пользовательские переводы из JSON файлов в папке translations.
         """
         try:
@@ -60,27 +60,27 @@ class Translator:
                 Path("translations"),
                 Path.home() / ".square_root_calculator" / "translations",
             ]
-            
+
             for translations_dir in translations_paths:
                 if translations_dir.exists() and translations_dir.is_dir():
                     for json_file in translations_dir.glob("*.json"):
                         # Skip example files
-                        if json_file.name.endswith('.example'):
+                        if json_file.name.endswith(".example"):
                             continue
-                            
+
                         try:
-                            with open(json_file, 'r', encoding='utf-8') as f:
+                            with open(json_file, "r", encoding="utf-8") as f:
                                 custom_trans = json.load(f)
                                 # Assume filename is the language code (e.g., de.json for German)
                                 lang_code = json_file.stem
-                                
+
                                 if lang_code in self.TRANSLATIONS:
                                     # Update existing language with custom translations
                                     self.TRANSLATIONS[lang_code].update(custom_trans)
                                 else:
                                     # Add new language
                                     self.TRANSLATIONS[lang_code] = custom_trans
-                                
+
                                 self.custom_translations_loaded = True
                         except (json.JSONDecodeError, Exception) as e:
                             print(f"Failed to load translation from {json_file}: {e}")
@@ -89,7 +89,7 @@ class Translator:
 
     def reload_translations(self):
         """Reload all custom translations from JSON files.
-        
+
         Перезагрузить все пользовательские переводы из JSON файлов.
         """
         # Clear translations and reload
@@ -138,7 +138,7 @@ class Translator:
             # Get language name from _language_name key, or fallback to code
             lang_name = translations.get("_language_name", lang_code.upper())
             languages.append((lang_code, lang_name))
-        
+
         # Sort by language code
         languages.sort(key=lambda x: x[0])
         return languages

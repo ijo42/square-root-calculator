@@ -432,17 +432,17 @@ class MainWindow(QMainWindow):
 
     def build_language_menu(self):
         """Build language menu with all available languages.
-        
+
         Построить меню языков со всеми доступными языками.
         """
         # Clear existing actions
         self.language_menu.clear()
         self.language_actions.clear()
-        
+
         # Get all available languages
         available_languages = self.translator.get_available_languages()
         current_language = self.settings.get("language", "en")
-        
+
         # Create action for each language
         for lang_code, lang_name in available_languages:
             action = QAction(lang_name, self)
@@ -454,7 +454,7 @@ class MainWindow(QMainWindow):
             )
             self.language_menu.addAction(action)
             self.language_actions[lang_code] = action
-        
+
         # Add separator and reload option
         self.language_menu.addSeparator()
         self.reload_translations_action = QAction(
@@ -837,27 +837,26 @@ class MainWindow(QMainWindow):
                 # User previously skipped this version, don't show again
                 self._manual_check = False
                 return
-            
+
             message = self.translator.get("update_message").format(version, __version__)
-            
+
             # Create message box with custom buttons
             msgBox = QMessageBox(self)
             msgBox.setWindowTitle(self.translator.get("update_available"))
             msgBox.setText(message)
             msgBox.setIcon(QMessageBox.Icon.Information)
-            
+
             # Add Download and Skip buttons
             download_button = msgBox.addButton(
-                self.translator.get("download_update"), 
-                QMessageBox.ButtonRole.AcceptRole
+                self.translator.get("download_update"),
+                QMessageBox.ButtonRole.AcceptRole,
             )
             skip_button = msgBox.addButton(
-                self.translator.get("skip_update"), 
-                QMessageBox.ButtonRole.RejectRole
+                self.translator.get("skip_update"), QMessageBox.ButtonRole.RejectRole
             )
-            
+
             msgBox.exec()
-            
+
             # If user clicked Download, open the download URL
             if msgBox.clickedButton() == download_button:
                 download_url = self.translator.get("download_url")

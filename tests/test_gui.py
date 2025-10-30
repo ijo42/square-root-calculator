@@ -35,13 +35,13 @@ class TestHistoryDisplayManager:
     def test_add_to_history_with_result(self, history_display):
         """Test adding calculation result to history."""
         from decimal import Decimal
-        
+
         # Create a mock calculation result with proper format
         result = CalculationResult(
             input_value="4",
             roots=[(Decimal("2.0"), Decimal("0")), (Decimal("-2.0"), Decimal("0"))],
             precision=10,
-            is_complex=False
+            is_complex=False,
         )
 
         history_display.add_to_history(result)
