@@ -153,16 +153,18 @@ class TestCalculationResultIntegration:
         from square_root_calculator.core.calculator import SquareRootCalculator
 
         calc = SquareRootCalculator(precision=10)
-        result = calc.calculate_real(4)
+        result = calc.calculate(4)
 
         # Verify result structure
         assert result.input_value == "4"
         assert len(result.roots) == 2
-        assert result.roots[0] == "2.0000000000"
+        # result.roots contains tuples of (real, imag) Decimal values
+        formatted_roots = result.get_formatted_roots()
+        assert formatted_roots[0] == "2.0000000000"
 
         # Create history manager and add
         history = HistoryManager()
-        history.add_entry(str(result.input_value), str(result.roots[0]))
+        history.add_entry(str(result.input_value), formatted_roots[0])
 
         # Verify it was added correctly
         entries = history.get_entries()
