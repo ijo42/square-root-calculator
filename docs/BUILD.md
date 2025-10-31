@@ -19,7 +19,7 @@ This guide explains how to build standalone executables for the Square Root Calc
 
 1. **uv** - Modern Python package manager
    ```bash
-   # Linux/macOS
+   # Linux
    curl -LsSf https://astral.sh/uv/install.sh | sh
    
    # Windows (PowerShell)
