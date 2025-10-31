@@ -34,7 +34,7 @@ def main():
         print("✗ uv не установлен / uv is not installed")
         print()
         print("Установите uv / Install uv:")
-        print("  curl -LsSf https://astral.sh/uv/install.sh | sh  (Linux/macOS)")
+        print("  curl -LsSf https://astral.sh/uv/install.sh | sh  (Linux)")
         print("  powershell -c \"irm https://astral.sh/uv/install.ps1 | iex\"  (Windows)")
         print()
         print("Или используйте / Or use:")

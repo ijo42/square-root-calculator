@@ -99,7 +99,7 @@ Rather than using external translation files:
 
 ### 4. PyQt6 for GUI
 PyQt6 was chosen because:
-- Cross-platform (Windows, macOS, Linux)
+- Cross-platform (Windows, Linux)
 - Modern, native-looking widgets
 - Excellent Python bindings
 - Active development and support

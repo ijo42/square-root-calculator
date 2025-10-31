@@ -1,6 +1,6 @@
 #!/bin/bash
-# Скрипт запуска тестов для Linux/macOS с использованием uv
-# Test execution script for Linux/macOS using uv package manager
+# Скрипт запуска тестов для Linux с использованием uv
+# Test execution script for Linux using uv package manager
 # Запускает pytest с покрытием кода и генерирует HTML отчёты
 # Runs pytest with coverage and generates HTML reports
 

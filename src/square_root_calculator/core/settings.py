@@ -87,17 +87,7 @@ class Settings:
         """
         try:
             # Try to detect dark mode on different platforms
-            if sys.platform == "darwin":  # macOS
-                import subprocess
-
-                result = subprocess.run(
-                    ["defaults", "read", "-g", "AppleInterfaceStyle"],
-                    capture_output=True,
-                    text=True,
-                )
-                if result.returncode == 0 and "Dark" in result.stdout:
-                    return "dark"
-            elif sys.platform == "win32":  # Windows
+            if sys.platform == "win32":  # Windows
                 try:
                     import winreg
 

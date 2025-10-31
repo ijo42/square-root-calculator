@@ -19,7 +19,7 @@ This guide explains how to build standalone executables for the Square Root Calc
 
 1. **uv** - Modern Python package manager
    ```bash
-   # Linux/macOS
+   # Linux
    curl -LsSf https://astral.sh/uv/install.sh | sh
    
    # Windows (PowerShell)
@@ -237,7 +237,7 @@ uv run python -c "import PyQt6; import qt_material; print('OK')"
 If you encounter errors, clean build artifacts and rebuild:
 
 ```bash
-# Linux/macOS
+# Linux
 rm -rf build dist __pycache__
 rm *.spec  # Only if you want to recreate spec file
 

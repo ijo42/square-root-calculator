@@ -4,7 +4,7 @@ Comprehensive guide for running tests in the Square Root Calculator project.
 
 ## Quick Start
 
-### Linux/macOS
+### Linux
 
 ```bash
 # Make script executable
@@ -32,7 +32,7 @@ python run_tests.py
 
 ### 1. Full Test Suite with Coverage
 
-**`run_tests.sh` (Linux/macOS)** or **`run_tests.bat` (Windows)**
+**`run_tests.sh` (Linux)** or **`run_tests.bat` (Windows)**
 
 Features:
 - Creates virtual environment if needed
@@ -53,7 +53,7 @@ Output files:
 **`run_tests.py`**
 
 Features:
-- Works on Windows, Linux, and macOS
+- Works on Windows, Linux
 - Checks for virtual environment
 - Installs dependencies
 - Runs tests with coverage
@@ -66,7 +66,7 @@ python run_tests.py
 
 ### 3. Quick Test Runner
 
-**`test_quick.sh` (Linux/macOS)** or **`test_quick.bat` (Windows)**
+**`test_quick.sh` (Linux)** or **`test_quick.bat` (Windows)**
 
 Features:
 - Fast test execution
@@ -266,7 +266,7 @@ pip install pytest pytest-cov pytest-qt
 python -m venv .venv
 
 # Activate it
-source .venv/bin/activate  # Linux/macOS
+source .venv/bin/activate  # Linux
 .venv\Scripts\activate     # Windows
 
 # Install dependencies

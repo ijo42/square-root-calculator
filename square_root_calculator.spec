@@ -8,7 +8,7 @@ This file configures how PyInstaller builds the standalone executable.
 Этот файл настраивает сборку standalone исполняемого файла.
 
 Usage / Использование:
-   Linux/macOS:   uv run pyinstaller square_root_calculator.spec
+   Linux:   uv run pyinstaller square_root_calculator.spec
    Windows:       uv run pyinstaller square_root_calculator.spec
 """
 
