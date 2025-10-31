@@ -6,7 +6,7 @@
 
 ## Быстрый старт
 
-### Linux/macOS
+### Linux
 
 ```bash
 # Сделать скрипт исполняемым
@@ -34,7 +34,7 @@ python run_tests.py
 
 ### 1. Полный набор тестов с покрытием
 
-**`run_tests.sh` (Linux/macOS)** или **`run_tests.bat` (Windows)**
+**`run_tests.sh` (Linux)** или **`run_tests.bat` (Windows)**
 
 Возможности:
 - Создаёт виртуальное окружение при необходимости
@@ -52,7 +52,7 @@ python run_tests.py
 
 **Использование**:
 ```bash
-# Linux/macOS
+# Linux
 ./run_tests.sh
 
 # Windows
@@ -94,7 +94,7 @@ HTML coverage report generated: htmlcov/index.html
 
 ### 2. Быстрые тесты (без покрытия)
 
-**`test_quick.sh` (Linux/macOS)** или **`test_quick.bat` (Windows)**
+**`test_quick.sh` (Linux)** или **`test_quick.bat` (Windows)**
 
 Возможности:
 - Быстрое выполнение тестов
@@ -127,7 +127,7 @@ python run_tests.py
 - Автоматическое определение окружения
 - Установка зависимостей
 - Генерация отчётов
-- Работает на Windows, Linux, macOS
+- Работает на Windows, Linux
 
 ### 4. Makefile команды
 
@@ -228,7 +228,7 @@ pytest --cov=src/square_root_calculator --cov-report=html --cov-report=term
 ### Открытие HTML отчёта
 
 ```bash
-# Linux/macOS
+# Linux
 open htmlcov/index.html
 
 # Windows
