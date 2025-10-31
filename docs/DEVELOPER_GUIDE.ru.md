@@ -660,7 +660,6 @@ python -m pstats profile.stats
 
 Для дополнительной информации см.:
 - [Руководство по тестированию](TESTING.ru.md)
-- [Внесение вклада](../CONTRIBUTING.ru.md)
 - [Примеры использования](USAGE_EXAMPLES.ru.md)
 
 ---
