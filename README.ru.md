@@ -87,7 +87,7 @@
 Скачайте последнюю собранную версию для вашей платформы со страницы [GitHub Releases](https://github.com/ijo42/square-root-calculator/releases):
 
 - **Windows**: Скачайте `square-root-calculator.exe`
-- **Linux**: Скачайте `square-root-calculator` (ELF бинарник)
+- **Linux**: Скачайте `square-root-calculator` (ELF файл)
 
 Для предварительно собранных исполняемых файлов установка Python не требуется!
 
