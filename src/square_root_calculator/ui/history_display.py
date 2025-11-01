@@ -55,11 +55,11 @@ class HistoryDisplayManager:
 
         # Handle different complex number formats
         # Format: "a+bi", "-a+bi", "a-bi", "-a-bi", "bi", "-bi"
-        
+
         # Count minus signs to determine format
         minus_count = input_str.count("-")
         has_plus = "+" in input_str
-        
+
         if has_plus:
             # Format: "a+bi" or "-a+bi"
             parts = input_str.split("+")

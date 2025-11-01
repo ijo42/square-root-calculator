@@ -194,7 +194,7 @@ class MainWindow(QMainWindow):
         self.input_label.setStyleSheet("font-size: 14px;")
         real_input_layout.addWidget(self.input_label)
         real_input_layout.addStretch()
-        
+
         self.input_field = QLineEdit()
         self.input_field.setPlaceholderText("0")
         self.input_field.setMinimumWidth(INPUT_MIN_WIDTH)
@@ -202,7 +202,7 @@ class MainWindow(QMainWindow):
         self.input_field.setAlignment(Qt.AlignmentFlag.AlignRight)
         self.input_field.setStyleSheet("font-size: 14px;")
         real_input_layout.addWidget(self.input_field)
-        
+
         real_layout.addLayout(real_input_layout)
         real_layout.addStretch()
 
@@ -224,7 +224,7 @@ class MainWindow(QMainWindow):
         self.real_part_label.setStyleSheet("font-size: 14px;")
         real_row.addWidget(self.real_part_label)
         real_row.addStretch()
-        
+
         self.real_part_field = QLineEdit()
         self.real_part_field.setPlaceholderText("0")
         self.real_part_field.setMinimumWidth(INPUT_MIN_WIDTH)
@@ -241,7 +241,7 @@ class MainWindow(QMainWindow):
         self.imag_part_label.setStyleSheet("font-size: 14px;")
         imag_row.addWidget(self.imag_part_label)
         imag_row.addStretch()
-        
+
         self.imag_part_field = QLineEdit()
         self.imag_part_field.setPlaceholderText("0")
         self.imag_part_field.setMinimumWidth(INPUT_MIN_WIDTH)
@@ -263,7 +263,7 @@ class MainWindow(QMainWindow):
             Horizontal layout with buttons
         """
         button_layout = QHBoxLayout()
-        
+
         self.calculate_button = QPushButton()
         self.calculate_button.setStyleSheet("font-size: 16px; padding: 10px;")
         self.calculate_button.clicked.connect(self.calculate)
@@ -654,13 +654,13 @@ class MainWindow(QMainWindow):
             value: Precision value to set
         """
         self.precision_value_label.setText(str(value))
-        
+
         # Update slider if value is within its range
         if value <= PRECISION_SLIDER_MAX:
             self.precision_slider.blockSignals(True)
             self.precision_slider.setValue(value)
             self.precision_slider.blockSignals(False)
-        
+
         # Update spinbox
         self.precision_spinbox.blockSignals(True)
         self.precision_spinbox.setValue(value)

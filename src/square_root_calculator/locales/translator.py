@@ -40,7 +40,7 @@ class Translator:
         Загрузить встроенные переводы из JSON файлов в папке locales.
         """
         # For PyInstaller bundled app, use _MEIPASS
-        if getattr(sys, 'frozen', False):
+        if getattr(sys, "frozen", False):
             base_path = Path(sys._MEIPASS)
             locales_dir = base_path / "square_root_calculator" / "locales"
         else:

@@ -176,7 +176,9 @@ class CalculationResult:
                 try:
                     from fractions import Fraction
 
-                    frac = Fraction(float(real_val)).limit_denominator(MAX_FRACTION_DENOMINATOR)
+                    frac = Fraction(float(real_val)).limit_denominator(
+                        MAX_FRACTION_DENOMINATOR
+                    )
                     if abs(float(frac) - float(real_val)) < FRACTION_TOLERANCE:
                         representations["fraction"] = (
                             f"{frac.numerator}/{frac.denominator}"
@@ -195,7 +197,9 @@ class CalculationResult:
                 theta = math.atan2(float(imag_val), float(real_val))
                 theta_deg = math.degrees(theta)
 
-                r_fmt = self._format_decimal(Decimal(str(r)), min(MAX_POLAR_PRECISION, self.precision))
+                r_fmt = self._format_decimal(
+                    Decimal(str(r)), min(MAX_POLAR_PRECISION, self.precision)
+                )
                 theta_fmt = self._format_decimal(
                     Decimal(str(theta)), min(MAX_POLAR_PRECISION, self.precision)
                 )
