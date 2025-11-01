@@ -1,6 +1,6 @@
 """Tests for settings management."""
 
-import pytest
+import pytest  # noqa: F401
 import tempfile
 from pathlib import Path
 from square_root_calculator.core.settings import Settings
@@ -18,8 +18,8 @@ class TestSettings:
         """Test default settings values."""
         assert settings.get("theme") == "light"
         assert settings.get("precision") == 4
-        assert settings.get("show_exact_precision") == False
-        assert settings.get("show_negative_roots") == False
+        assert settings.get("show_exact_precision") is False
+        assert settings.get("show_negative_roots") is False
         assert settings.get("language") == "en"
 
     def test_get_setting(self, settings):

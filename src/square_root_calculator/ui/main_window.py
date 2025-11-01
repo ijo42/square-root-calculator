@@ -5,8 +5,6 @@
 
 import re
 import sys
-import webbrowser
-from decimal import Decimal
 from PyQt6.QtWidgets import (
     QApplication,
     QMainWindow,
@@ -16,14 +14,10 @@ from PyQt6.QtWidgets import (
     QLabel,
     QLineEdit,
     QPushButton,
-    QComboBox,
     QSpinBox,
     QTextEdit,
     QGroupBox,
-    QRadioButton,
-    QButtonGroup,
     QMessageBox,
-    QMenuBar,
     QMenu,
     QSlider,
     QTabWidget,
@@ -814,33 +808,71 @@ class MainWindow(QMainWindow):
         show_negative = self.settings.get("show_negative_roots", False)
 
         if len(formatted_roots) >= 1:
-            output += f"<p style='margin: 3px 0 3px 20px; color: #0066cc;'><b>{self.translator.get('root_positive')}</b> +√({result.input_value}) = {formatted_roots[0]}</p>"
+            pos_root_label = self.translator.get('root_positive')
+            output += (
+                f"<p style='margin: 3px 0 3px 20px; color: #0066cc;'>"
+                f"<b>{pos_root_label}</b> +√({result.input_value}) = "
+                f"{formatted_roots[0]}</p>"
+            )
 
             if show_negative and len(formatted_roots) >= 2:
-                output += f"<p style='margin: 3px 0 3px 20px; color: #0066cc;'><b>{self.translator.get('root_negative')}</b> -√({result.input_value}) = {formatted_roots[1]}</p>"
+                neg_root_label = self.translator.get('root_negative')
+                output += (
+                    f"<p style='margin: 3px 0 3px 20px; color: #0066cc;'>"
+                    f"<b>{neg_root_label}</b> -√({result.input_value}) = "
+                    f"{formatted_roots[1]}</p>"
+                )
 
         # Representations/Alternative forms
         representations = result.get_representations()
         if representations:
             if result.is_complex:
-                output += f"<p style='margin: 10px 0 5px 0;'><b>{self.translator.get('alternative_forms')}</b></p>"
+                alt_forms = self.translator.get('alternative_forms')
+                output += (
+                    f"<p style='margin: 10px 0 5px 0;'>"
+                    f"<b>{alt_forms}</b></p>"
+                )
 
                 if "polar" in representations:
-                    output += f"<p style='margin: 3px 0 3px 20px;'><b>{self.translator.get('polar_form')}</b> {representations['polar']}</p>"
+                    polar_label = self.translator.get('polar_form')
+                    output += (
+                        f"<p style='margin: 3px 0 3px 20px;'>"
+                        f"<b>{polar_label}</b> {representations['polar']}</p>"
+                    )
 
                 if "exponential" in representations:
-                    output += f"<p style='margin: 3px 0 3px 20px;'><b>{self.translator.get('exponential_form')}</b> {representations['exponential']}</p>"
+                    exp_label = self.translator.get('exponential_form')
+                    output += (
+                        f"<p style='margin: 3px 0 3px 20px;'>"
+                        f"<b>{exp_label}</b> {representations['exponential']}</p>"
+                    )
             else:
-                output += f"<p style='margin: 10px 0 5px 0;'><b>{self.translator.get('representations_label')}</b></p>"
+                repr_label = self.translator.get('representations_label')
+                output += (
+                    f"<p style='margin: 10px 0 5px 0;'>"
+                    f"<b>{repr_label}</b></p>"
+                )
 
                 if "decimal" in representations:
-                    output += f"<p style='margin: 3px 0 3px 20px;'><b>{self.translator.get('decimal_repr')}</b> {representations['decimal']}</p>"
+                    dec_label = self.translator.get('decimal_repr')
+                    output += (
+                        f"<p style='margin: 3px 0 3px 20px;'>"
+                        f"<b>{dec_label}</b> {representations['decimal']}</p>"
+                    )
 
                 if "scientific" in representations:
-                    output += f"<p style='margin: 3px 0 3px 20px;'><b>{self.translator.get('scientific_repr')}</b> {representations['scientific']}</p>"
+                    sci_label = self.translator.get('scientific_repr')
+                    output += (
+                        f"<p style='margin: 3px 0 3px 20px;'>"
+                        f"<b>{sci_label}</b> {representations['scientific']}</p>"
+                    )
 
                 if "fraction" in representations:
-                    output += f"<p style='margin: 3px 0 3px 20px;'><b>{self.translator.get('fraction_repr')}</b> {representations['fraction']}</p>"
+                    frac_label = self.translator.get('fraction_repr')
+                    output += (
+                        f"<p style='margin: 3px 0 3px 20px;'>"
+                        f"<b>{frac_label}</b> {representations['fraction']}</p>"
+                    )
 
         output += "</div>"
 

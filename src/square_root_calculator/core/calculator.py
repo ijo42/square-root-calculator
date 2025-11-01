@@ -153,67 +153,99 @@ class CalculationResult:
         Получить различные представления результата.
 
         Returns:
-            Dictionary with different representations (decimal, scientific, fraction, polar, exponential)
-            Словарь с различными представлениями (десятичное, научное, дробное, полярное, экспоненциальное)
+            Dictionary with different representations
+            Словарь с различными представлениями
         """
         representations = {}
 
         if not self.is_complex and len(self.roots) > 0:
-            real_val = self.roots[0][0]
-
-            # Standard decimal
-            representations["decimal"] = self._format_decimal(real_val, self.precision)
-
-            # Scientific notation
-            try:
-                exp_notation = f"{float(real_val):.{min(MAX_SCIENTIFIC_PRECISION, self.precision)}e}"
-                representations["scientific"] = exp_notation
-            except:
-                pass
-
-            # Fractional approximation (for small numbers)
-            if abs(real_val) < MAX_FRACTION_VALUE:
-                try:
-                    from fractions import Fraction
-
-                    frac = Fraction(float(real_val)).limit_denominator(
-                        MAX_FRACTION_DENOMINATOR
-                    )
-                    if abs(float(frac) - float(real_val)) < FRACTION_TOLERANCE:
-                        representations["fraction"] = (
-                            f"{frac.numerator}/{frac.denominator}"
-                        )
-                except:
-                    pass
+            self._add_real_representations(representations)
         elif self.is_complex and len(self.roots) > 0:
-            # Alternative forms for complex numbers
-            import math
-
-            real_val, imag_val = self.roots[0]
-
-            # Convert to polar form (r, θ)
-            try:
-                r = math.sqrt(float(real_val) ** 2 + float(imag_val) ** 2)
-                theta = math.atan2(float(imag_val), float(real_val))
-                theta_deg = math.degrees(theta)
-
-                r_fmt = self._format_decimal(
-                    Decimal(str(r)), min(MAX_POLAR_PRECISION, self.precision)
-                )
-                theta_fmt = self._format_decimal(
-                    Decimal(str(theta)), min(MAX_POLAR_PRECISION, self.precision)
-                )
-
-                representations["polar"] = (
-                    f"{r_fmt} ∠ {theta_fmt} rad ({theta_deg:.2f}°)"
-                )
-
-                # Exponential form: r * e^(iθ)
-                representations["exponential"] = f"{r_fmt} * e^(i*{theta_fmt})"
-            except:
-                pass
+            self._add_complex_representations(representations)
 
         return representations
+
+    def _add_real_representations(self, representations: Dict[str, str]) -> None:
+        """Add representations for real numbers.
+
+        Добавить представления для действительных чисел.
+
+        Args:
+            representations: Dictionary to add representations to
+        """
+        real_val = self.roots[0][0]
+
+        # Standard decimal
+        representations["decimal"] = self._format_decimal(real_val, self.precision)
+
+        # Scientific notation
+        try:
+            precision = min(MAX_SCIENTIFIC_PRECISION, self.precision)
+            exp_notation = f"{float(real_val):.{precision}e}"
+            representations["scientific"] = exp_notation
+        except (ValueError, OverflowError):
+            pass
+
+        # Fractional approximation (for small numbers)
+        if abs(real_val) < MAX_FRACTION_VALUE:
+            self._add_fraction_representation(real_val, representations)
+
+    def _add_fraction_representation(
+        self, real_val: Decimal, representations: Dict[str, str]
+    ) -> None:
+        """Add fractional representation if applicable.
+
+        Добавить дробное представление, если применимо.
+
+        Args:
+            real_val: Real value to represent as fraction
+            representations: Dictionary to add representation to
+        """
+        try:
+            from fractions import Fraction
+
+            frac = Fraction(float(real_val)).limit_denominator(
+                MAX_FRACTION_DENOMINATOR
+            )
+            if abs(float(frac) - float(real_val)) < FRACTION_TOLERANCE:
+                representations["fraction"] = (
+                    f"{frac.numerator}/{frac.denominator}"
+                )
+        except (ValueError, ZeroDivisionError):
+            pass
+
+    def _add_complex_representations(
+        self, representations: Dict[str, str]
+    ) -> None:
+        """Add representations for complex numbers.
+
+        Добавить представления для комплексных чисел.
+
+        Args:
+            representations: Dictionary to add representations to
+        """
+        import math
+
+        real_val, imag_val = self.roots[0]
+
+        # Convert to polar form (r, θ)
+        try:
+            r = math.sqrt(float(real_val) ** 2 + float(imag_val) ** 2)
+            theta = math.atan2(float(imag_val), float(real_val))
+            theta_deg = math.degrees(theta)
+
+            precision = min(MAX_POLAR_PRECISION, self.precision)
+            r_fmt = self._format_decimal(Decimal(str(r)), precision)
+            theta_fmt = self._format_decimal(Decimal(str(theta)), precision)
+
+            representations["polar"] = (
+                f"{r_fmt} ∠ {theta_fmt} rad ({theta_deg:.2f}°)"
+            )
+
+            # Exponential form: r * e^(iθ)
+            representations["exponential"] = f"{r_fmt} * e^(i*{theta_fmt})"
+        except (ValueError, OverflowError):
+            pass
 
 
 class SquareRootCalculator:
@@ -414,7 +446,7 @@ class SquareRootCalculator:
                     imag_part = imag_value.sqrt()
                 else:
                     imag_part = -imag_value.sqrt()
-        except decimal.InvalidOperation as e:
+        except decimal.InvalidOperation:
             raise PrecisionError(
                 self.precision, max(10, self.precision + 5), is_generic=True
             )

@@ -1,6 +1,6 @@
 """Tests for translator and localization."""
 
-import pytest
+import pytest  # noqa: F401
 from square_root_calculator.locales.translator import Translator
 
 

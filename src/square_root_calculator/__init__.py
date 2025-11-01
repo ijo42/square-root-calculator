@@ -1,6 +1,5 @@
 """Square Root Calculator - A comprehensive calculator for computing square roots."""
 
-import os
 import sys
 from pathlib import Path
 
