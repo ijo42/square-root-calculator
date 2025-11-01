@@ -70,7 +70,7 @@ class CalculationResult:
         roots: List[Tuple[Decimal, Decimal]],
         is_complex: bool,
         precision: int,
-    ):
+    ) -> None:
         """Initialize calculation result.
 
         Инициализировать результат вычисления.
@@ -218,7 +218,7 @@ class SquareRootCalculator:
     Калькулятор для вычисления квадратных корней с настраиваемой точностью.
     """
 
-    def __init__(self, precision: int = 50):
+    def __init__(self, precision: int = 50) -> None:
         """Initialize calculator with specified precision.
 
         Инициализировать калькулятор с заданной точностью.
@@ -230,7 +230,7 @@ class SquareRootCalculator:
         self.precision = precision
         getcontext().prec = precision
 
-    def set_precision(self, precision: int):
+    def set_precision(self, precision: int) -> None:
         """Set the precision for calculations.
 
         Установить точность для вычислений.

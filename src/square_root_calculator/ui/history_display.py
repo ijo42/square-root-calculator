@@ -3,8 +3,11 @@
 Управление отображением истории для пользовательского интерфейса.
 """
 
-from PyQt6.QtWidgets import QListWidgetItem
+from typing import Optional
+from PyQt6.QtWidgets import QListWidgetItem, QListWidget
 from ..core.calculator import CalculationResult
+from ..core.history import HistoryManager, HistoryEntry
+from ..locales.translator import Translator
 from ..core.constants import MAX_RESULT_DISPLAY_LENGTH, MAX_HISTORY_ENTRIES
 
 
@@ -14,7 +17,12 @@ class HistoryDisplayManager:
     Управляет отображением истории в пользовательском интерфейсе.
     """
 
-    def __init__(self, history_list_widget, history_manager, translator):
+    def __init__(
+        self,
+        history_list_widget: QListWidget,
+        history_manager: HistoryManager,
+        translator: Translator,
+    ):
         """Initialize history display manager.
 
         Args:
@@ -135,7 +143,7 @@ class HistoryDisplayManager:
         self.history.clear()
         self.update_display()
 
-    def get_selected_entry(self):
+    def get_selected_entry(self) -> Optional[HistoryEntry]:
         """Get the currently selected history entry.
 
         Получить выбранную запись истории.

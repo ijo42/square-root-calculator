@@ -3,7 +3,7 @@
 Менеджер истории для хранения истории вычислений.
 """
 
-from typing import List
+from typing import List, Optional
 from datetime import datetime
 
 
@@ -17,12 +17,12 @@ class HistoryEntry:
         self,
         input_value: str,
         result_text: str,
-        timestamp: datetime = None,
-        precision: int = None,
+        timestamp: Optional[datetime] = None,
+        precision: Optional[int] = None,
         is_complex: bool = False,
-        real_part: str = None,
-        imag_part: str = None,
-    ):
+        real_part: Optional[str] = None,
+        imag_part: Optional[str] = None,
+    ) -> None:
         """Initialize history entry.
 
         Инициализировать запись истории.
@@ -85,7 +85,7 @@ class HistoryManager:
     Управляет историей вычислений.
     """
 
-    def __init__(self, max_entries: int = 50):
+    def __init__(self, max_entries: int = 50) -> None:
         """Initialize history manager.
 
         Инициализировать менеджер истории.
@@ -101,11 +101,11 @@ class HistoryManager:
         self,
         input_value: str,
         result_text: str,
-        precision: int = None,
+        precision: Optional[int] = None,
         is_complex: bool = False,
-        real_part: str = None,
-        imag_part: str = None,
-    ):
+        real_part: Optional[str] = None,
+        imag_part: Optional[str] = None,
+    ) -> None:
         """Add a new entry to history.
 
         Добавить новую запись в историю.
@@ -138,7 +138,7 @@ class HistoryManager:
         if len(self.entries) > self.max_entries:
             self.entries = self.entries[: self.max_entries]
 
-    def get_entries(self, limit: int = None) -> List[HistoryEntry]:
+    def get_entries(self, limit: Optional[int] = None) -> List[HistoryEntry]:
         """Get history entries.
 
         Получить записи истории.
@@ -155,7 +155,7 @@ class HistoryManager:
             return self.entries.copy()
         return self.entries[:limit]
 
-    def clear(self):
+    def clear(self) -> None:
         """Clear all history.
 
         Очистить всю историю.
