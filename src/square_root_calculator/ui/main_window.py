@@ -120,20 +120,70 @@ class MainWindow(QMainWindow):
         layout = QVBoxLayout()
         central_widget.setLayout(layout)
 
-        # Mode selection using tabs (more convenient)
-        self.mode_tabs = QTabWidget()
+        # Top row: input tabs and precision control
+        top_row_layout = self._create_top_row()
+        layout.addLayout(top_row_layout)
 
-        # Create a horizontal layout to hold mode tabs and precision control side by side
+        # Bottom: result display and history
+        splitter = self._create_result_and_history_section()
+        layout.addWidget(splitter)
+
+        # Update all text
+        self.update_ui_text()
+
+    def _create_top_row(self) -> QHBoxLayout:
+        """Create top row with input tabs and precision control.
+
+        Создать верхний ряд с вкладками ввода и управлением точностью.
+
+        Returns:
+            Horizontal layout with mode tabs and precision control
+        """
         top_row_layout = QHBoxLayout()
 
         # Left side: Mode tabs with input fields
+        input_container = self._create_input_tabs()
+        top_row_layout.addWidget(input_container, stretch=3)
+
+        # Right side: Precision control
+        precision_group = self._create_precision_control()
+        top_row_layout.addWidget(precision_group, stretch=2)
+
+        return top_row_layout
+
+    def _create_input_tabs(self) -> QWidget:
+        """Create input tabs container with real and complex mode tabs.
+
+        Создать контейнер вкладок ввода с вкладками реального и комплексного режимов.
+
+        Returns:
+            Widget containing mode tabs
+        """
+        # Mode selection using tabs
+        self.mode_tabs = QTabWidget()
+
+        # Container for tabs and buttons
         input_container = QWidget()
         input_container_layout = QVBoxLayout()
         input_container_layout.setContentsMargins(0, 0, 0, 0)
         input_container.setLayout(input_container_layout)
         input_container_layout.addWidget(self.mode_tabs)
 
-        # Real numbers tab
+        # Create tabs
+        self._create_real_numbers_tab()
+        self._create_complex_numbers_tab()
+
+        # Buttons
+        button_layout = self._create_buttons()
+        input_container_layout.addLayout(button_layout)
+
+        return input_container
+
+    def _create_real_numbers_tab(self):
+        """Create real numbers input tab.
+
+        Создать вкладку ввода действительных чисел.
+        """
         real_tab = QWidget()
         real_layout = QVBoxLayout()
         real_tab.setLayout(real_layout)
@@ -144,6 +194,7 @@ class MainWindow(QMainWindow):
         self.input_label.setStyleSheet("font-size: 14px;")
         real_input_layout.addWidget(self.input_label)
         real_input_layout.addStretch()
+        
         self.input_field = QLineEdit()
         self.input_field.setPlaceholderText("0")
         self.input_field.setMinimumWidth(INPUT_MIN_WIDTH)
@@ -151,22 +202,29 @@ class MainWindow(QMainWindow):
         self.input_field.setAlignment(Qt.AlignmentFlag.AlignRight)
         self.input_field.setStyleSheet("font-size: 14px;")
         real_input_layout.addWidget(self.input_field)
+        
         real_layout.addLayout(real_input_layout)
         real_layout.addStretch()
 
         self.mode_tabs.addTab(real_tab, "")  # Text will be set in update_ui_text
 
-        # Complex numbers tab
+    def _create_complex_numbers_tab(self):
+        """Create complex numbers input tab.
+
+        Создать вкладку ввода комплексных чисел.
+        """
         complex_tab = QWidget()
         complex_layout = QVBoxLayout()
         complex_tab.setLayout(complex_layout)
 
+        # Real part
         real_row = QHBoxLayout()
         self.real_part_label = QLabel()
         self.real_part_label.setMinimumWidth(LABEL_MIN_WIDTH)
         self.real_part_label.setStyleSheet("font-size: 14px;")
         real_row.addWidget(self.real_part_label)
         real_row.addStretch()
+        
         self.real_part_field = QLineEdit()
         self.real_part_field.setPlaceholderText("0")
         self.real_part_field.setMinimumWidth(INPUT_MIN_WIDTH)
@@ -176,12 +234,14 @@ class MainWindow(QMainWindow):
         real_row.addWidget(self.real_part_field)
         complex_layout.addLayout(real_row)
 
+        # Imaginary part
         imag_row = QHBoxLayout()
         self.imag_part_label = QLabel()
         self.imag_part_label.setMinimumWidth(LABEL_MIN_WIDTH)
         self.imag_part_label.setStyleSheet("font-size: 14px;")
         imag_row.addWidget(self.imag_part_label)
         imag_row.addStretch()
+        
         self.imag_part_field = QLineEdit()
         self.imag_part_field.setPlaceholderText("0")
         self.imag_part_field.setMinimumWidth(INPUT_MIN_WIDTH)
@@ -194,8 +254,16 @@ class MainWindow(QMainWindow):
 
         self.mode_tabs.addTab(complex_tab, "")  # Text will be set in update_ui_text
 
-        # Buttons
+    def _create_buttons(self) -> QHBoxLayout:
+        """Create calculate and clear buttons.
+
+        Создать кнопки вычисления и очистки.
+
+        Returns:
+            Horizontal layout with buttons
+        """
         button_layout = QHBoxLayout()
+        
         self.calculate_button = QPushButton()
         self.calculate_button.setStyleSheet("font-size: 16px; padding: 10px;")
         self.calculate_button.clicked.connect(self.calculate)
@@ -206,22 +274,28 @@ class MainWindow(QMainWindow):
         self.clear_button.clicked.connect(self.clear_fields)
         button_layout.addWidget(self.clear_button)
 
-        input_container_layout.addLayout(button_layout)
+        return button_layout
 
-        top_row_layout.addWidget(input_container, stretch=3)
+    def _create_precision_control(self) -> QGroupBox:
+        """Create precision control group with slider and spinbox.
 
-        # Right side: Precision control with slider
+        Создать группу управления точностью со слайдером и спинбоксом.
+
+        Returns:
+            QGroupBox containing precision controls
+        """
         precision_group = QGroupBox()
         self.precision_group = precision_group
         precision_group.setMinimumWidth(PRECISION_GROUP_MIN_WIDTH)
         precision_layout = QVBoxLayout()
+
+        initial_precision = self.settings.get("precision", DEFAULT_PRECISION)
 
         # Precision value display
         precision_value_layout = QHBoxLayout()
         self.precision_label = QLabel()
         self.precision_label.setStyleSheet("font-size: 14px;")
         precision_value_layout.addWidget(self.precision_label)
-        initial_precision = self.settings.get("precision", DEFAULT_PRECISION)
         self.precision_value_label = QLabel(str(initial_precision))
         self.precision_value_label.setStyleSheet("font-weight: bold; font-size: 16px;")
         precision_value_layout.addWidget(self.precision_value_label)
@@ -243,6 +317,7 @@ class MainWindow(QMainWindow):
         self.slider_layout.addWidget(self.precision_slider)
         self.slider_max_label = QLabel(str(PRECISION_SLIDER_MAX))
         self.slider_max_label.setStyleSheet("font-size: 13px;")
+        self.slider_layout.addWidget(self.slider_max_label)
         precision_layout.addLayout(self.slider_layout)
 
         # SpinBox for precise input
@@ -262,10 +337,24 @@ class MainWindow(QMainWindow):
         precision_layout.addLayout(self.spinbox_layout)
 
         # Show either slider or spinbox (mutually exclusive)
-        # Default to showing slider only
         show_exact = self.settings.get("show_exact_precision", False)
+        self._toggle_precision_display(show_exact)
+
+        precision_group.setLayout(precision_layout)
+        return precision_group
+
+    def _toggle_precision_display(self, show_exact: bool):
+        """Toggle between slider and exact precision spinbox display.
+
+        Переключить отображение между слайдером и точным спинбоксом.
+
+        Args:
+            show_exact: True to show spinbox, False to show slider
+        """
         if show_exact:
             # Show spinbox, hide slider and precision label/value
+            self.spinbox_label.show()
+            self.precision_spinbox.show()
             self.precision_label.hide()
             self.precision_value_label.hide()
             self.slider_min_label.hide()
@@ -275,18 +364,23 @@ class MainWindow(QMainWindow):
             # Show slider and precision label/value, hide spinbox
             self.spinbox_label.hide()
             self.precision_spinbox.hide()
+            self.precision_label.show()
+            self.precision_value_label.show()
+            self.slider_min_label.show()
+            self.precision_slider.show()
+            self.slider_max_label.show()
 
-        precision_group.setLayout(precision_layout)
-        top_row_layout.addWidget(precision_group, stretch=2)
+    def _create_result_and_history_section(self) -> QSplitter:
+        """Create result display and history panel.
 
-        # Add the top row layout to main layout
-        layout.addLayout(top_row_layout)
+        Создать панель отображения результатов и истории.
 
-        # Splitter for result and history
+        Returns:
+            QSplitter containing result and history sections
+        """
         splitter = QSplitter(Qt.Orientation.Horizontal)
-        layout.addWidget(splitter)
 
-        # Result display with better formatting
+        # Result display
         result_group = QGroupBox()
         self.result_group = result_group
         result_layout = QVBoxLayout()
@@ -304,7 +398,6 @@ class MainWindow(QMainWindow):
         """
         )
         result_layout.addWidget(self.result_display)
-
         result_group.setLayout(result_layout)
         splitter.addWidget(result_group)
 
@@ -322,7 +415,6 @@ class MainWindow(QMainWindow):
             }
         """
         )
-        # Change from itemClicked to itemDoubleClicked
         self.history_list.itemDoubleClicked.connect(self.history_item_double_clicked)
         history_layout.addWidget(self.history_list)
 
@@ -333,11 +425,10 @@ class MainWindow(QMainWindow):
         history_group.setLayout(history_layout)
         splitter.addWidget(history_group)
 
-        # Set initial splitter sizes (60% result, 40% history)
+        # Set initial splitter sizes
         splitter.setSizes([SPLITTER_RESULT_SIZE, SPLITTER_HISTORY_SIZE])
 
-        # Update all text
-        self.update_ui_text()
+        return splitter
 
     def create_menu_bar(self):
         """Create the menu bar."""
@@ -540,25 +631,7 @@ class MainWindow(QMainWindow):
         """Toggle between slider and exact precision spinbox (mutually exclusive)."""
         show = self.show_exact_precision_action.isChecked()
         self.settings.set("show_exact_precision", show)
-
-        if show:
-            # Show spinbox, hide slider and precision label/value
-            self.spinbox_label.show()
-            self.precision_spinbox.show()
-            self.precision_label.hide()
-            self.precision_value_label.hide()
-            self.slider_min_label.hide()
-            self.precision_slider.hide()
-            self.slider_max_label.hide()
-        else:
-            # Show slider and precision label/value, hide spinbox
-            self.spinbox_label.hide()
-            self.precision_spinbox.hide()
-            self.precision_label.show()
-            self.precision_value_label.show()
-            self.slider_min_label.show()
-            self.precision_slider.show()
-            self.slider_max_label.show()
+        self._toggle_precision_display(show)
 
     def toggle_negative_roots(self):
         """Toggle showing negative roots."""
