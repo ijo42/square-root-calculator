@@ -306,6 +306,7 @@ class MainWindow(QMainWindow):
         # Slider for quick adjustment
         self.slider_layout = QHBoxLayout()
         self.slider_min_label = QLabel(str(PRECISION_SLIDER_MIN))
+        self.slider_min_label.setStyleSheet("font-size: 13px;")
         self.slider_layout.addWidget(self.slider_min_label)
         self.precision_slider = QSlider(Qt.Orientation.Horizontal)
         self.precision_slider.setMinimum(PRECISION_SLIDER_MIN)

@@ -68,10 +68,10 @@ class Settings:
         """
         try:
             # Try to get system locale using the recommended approach
-            system_locale = locale.getlocale()[0]
-            if system_locale:
+            locale_info = locale.getlocale()
+            if locale_info and locale_info[0]:
                 # Extract language code (e.g., 'en_US' -> 'en', 'ru_RU' -> 'ru')
-                lang_code = system_locale.split("_")[0].lower()
+                lang_code = locale_info[0].split("_")[0].lower()
                 return lang_code
         except Exception:
             pass
