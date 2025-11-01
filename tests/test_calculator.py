@@ -1,8 +1,8 @@
 """Tests for calculator core functionality."""
 
-import pytest
+import pytest  # noqa: F401
 from decimal import Decimal
-from square_root_calculator.core.calculator import (
+from square_root_calculator.core.calculator import (  # noqa: F401
     SquareRootCalculator,
     InvalidInputError,
     CalculationResult,

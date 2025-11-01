@@ -26,7 +26,7 @@ class Settings:
         "skipped_updates": [],  # List of version numbers that user chose to skip
     }
 
-    def __init__(self):
+    def __init__(self) -> None:
         """Initialize settings manager.
 
         Инициализировать менеджер настроек.
@@ -38,7 +38,7 @@ class Settings:
         # Apply system defaults if settings file doesn't exist or settings are default
         self._apply_system_defaults()
 
-    def _apply_system_defaults(self):
+    def _apply_system_defaults(self) -> None:
         """Apply system defaults for language and theme if not explicitly set.
 
         Применить системные значения по умолчанию для языка и темы, если они не установлены явно.
@@ -67,11 +67,11 @@ class Settings:
             Language code ('en', 'ru', etc.)
         """
         try:
-            # Try to get system locale
-            system_locale = locale.getdefaultlocale()[0]
-            if system_locale:
+            # Try to get system locale using the recommended approach
+            locale_info = locale.getlocale()
+            if locale_info and locale_info[0]:
                 # Extract language code (e.g., 'en_US' -> 'en', 'ru_RU' -> 'ru')
-                lang_code = system_locale.split("_")[0].lower()
+                lang_code = locale_info[0].split("_")[0].lower()
                 return lang_code
         except Exception:
             pass
@@ -119,7 +119,7 @@ class Settings:
 
         return "light"  # Default to light theme
 
-    def load(self):
+    def load(self) -> None:
         """Load settings from file.
 
         Загрузить настройки из файла.
@@ -132,7 +132,7 @@ class Settings:
         except Exception as e:
             print(f"Could not load settings: {e}")
 
-    def save(self):
+    def save(self) -> None:
         """Save settings to file.
 
         Сохранить настройки в файл.
@@ -161,7 +161,7 @@ class Settings:
         """
         return self.settings.get(key, default)
 
-    def set(self, key: str, value: Any):
+    def set(self, key: str, value: Any) -> None:
         """Set a setting value.
 
         Установить значение настройки.
@@ -186,7 +186,7 @@ class Settings:
         """
         return self.settings.copy()
 
-    def reset(self):
+    def reset(self) -> None:
         """Reset to default settings.
 
         Сбросить к настройкам по умолчанию.

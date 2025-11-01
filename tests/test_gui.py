@@ -1,7 +1,7 @@
 """Tests for GUI components and main window."""
 
 import pytest
-from unittest.mock import MagicMock, patch
+from unittest.mock import MagicMock  # noqa: F401
 from square_root_calculator.core.calculator import CalculationResult
 from square_root_calculator.core.history import HistoryManager
 from square_root_calculator.ui.history_display import HistoryDisplayManager

@@ -3,8 +3,12 @@
 Управление отображением истории для пользовательского интерфейса.
 """
 
-from PyQt6.QtWidgets import QListWidgetItem
+from typing import Optional
+from PyQt6.QtWidgets import QListWidgetItem, QListWidget
 from ..core.calculator import CalculationResult
+from ..core.history import HistoryManager, HistoryEntry
+from ..locales.translator import Translator
+from ..core.constants import MAX_RESULT_DISPLAY_LENGTH, MAX_HISTORY_ENTRIES
 
 
 class HistoryDisplayManager:
@@ -13,7 +17,12 @@ class HistoryDisplayManager:
     Управляет отображением истории в пользовательском интерфейсе.
     """
 
-    def __init__(self, history_list_widget, history_manager, translator):
+    def __init__(
+        self,
+        history_list_widget: QListWidget,
+        history_manager: HistoryManager,
+        translator: Translator,
+    ):
         """Initialize history display manager.
 
         Args:
@@ -24,6 +33,59 @@ class HistoryDisplayManager:
         self.history_list = history_list_widget
         self.history = history_manager
         self.translator = translator
+
+    @staticmethod
+    def _parse_complex_input(input_str: str) -> tuple[str, str]:
+        """Parse complex number string into real and imaginary parts.
+
+        Разобрать строку комплексного числа на действительную и мнимую части.
+
+        Args:
+            input_str: Complex number string (e.g., "3+4i", "-3-4i")
+
+        Returns:
+            Tuple of (real_part, imaginary_part) as strings
+        """
+        if "i" not in input_str:
+            # Just real part
+            return input_str, "0"
+
+        # Remove 'i' for parsing
+        input_str = input_str.replace("i", "")
+
+        # Handle different complex number formats
+        # Format: "a+bi", "-a+bi", "a-bi", "-a-bi", "bi", "-bi"
+
+        # Count minus signs to determine format
+        minus_count = input_str.count("-")
+        has_plus = "+" in input_str
+
+        if has_plus:
+            # Format: "a+bi" or "-a+bi"
+            parts = input_str.split("+")
+            real_part = parts[0] if parts[0] else "0"
+            imag_part = parts[1] if len(parts) > 1 else "0"
+        elif minus_count == 1 and not input_str.startswith("-"):
+            # Format: "a-bi" (minus not at start)
+            parts = input_str.split("-")
+            real_part = parts[0] if parts[0] else "0"
+            imag_part = "-" + parts[1] if len(parts) > 1 else "0"
+        elif minus_count == 2 and input_str.startswith("-"):
+            # Format: "-a-bi" (both negative)
+            temp = input_str[1:]  # Remove leading minus
+            parts = temp.split("-")
+            real_part = "-" + parts[0] if parts[0] else "0"
+            imag_part = "-" + parts[1] if len(parts) > 1 else "0"
+        elif minus_count == 1 and input_str.startswith("-"):
+            # Format: "-bi" (just negative imaginary)
+            real_part = "0"
+            imag_part = input_str
+        else:
+            # Just imaginary part without sign
+            real_part = "0"
+            imag_part = input_str
+
+        return real_part, imag_part
 
     def add_to_history(self, result: CalculationResult):
         """Add calculation result to history.
@@ -41,43 +103,7 @@ class HistoryDisplayManager:
         real_part = None
         imag_part = None
         if result.is_complex:
-            # Parse the input_value to extract real and imaginary parts
-            # Format is like "3+4i" or "3-4i" or just "3" or "4i" or "-3+4i" or "-3-4i"
-            input_str = result.input_value
-            if "i" in input_str:
-                # Complex input - remove 'i' for parsing
-                input_str = input_str.replace("i", "")
-
-                # Handle different formats
-                if "+" in input_str:
-                    # Format: "a+bi" or "-a+bi"
-                    parts = input_str.split("+")
-                    real_part = parts[0] if parts[0] else "0"
-                    imag_part = parts[1] if len(parts) > 1 else "0"
-                elif input_str.count("-") == 1 and not input_str.startswith("-"):
-                    # Format: "a-bi" (minus not at start)
-                    parts = input_str.split("-")
-                    real_part = parts[0] if parts[0] else "0"
-                    imag_part = "-" + parts[1] if len(parts) > 1 else "0"
-                elif input_str.count("-") == 2 and input_str.startswith("-"):
-                    # Format: "-a-bi" (both negative)
-                    # Remove leading minus, then split
-                    temp = input_str[1:]
-                    parts = temp.split("-")
-                    real_part = "-" + parts[0] if parts[0] else "0"
-                    imag_part = "-" + parts[1] if len(parts) > 1 else "0"
-                elif input_str.startswith("-") and "+" not in input_str:
-                    # Format: "-bi" (just negative imaginary)
-                    real_part = "0"
-                    imag_part = input_str
-                else:
-                    # Just imaginary part
-                    real_part = "0"
-                    imag_part = input_str
-            else:
-                # Just real part
-                real_part = input_str
-                imag_part = "0"
+            real_part, imag_part = self._parse_complex_input(result.input_value)
 
         self.history.add_entry(
             input_value=str(result.input_value),
@@ -96,12 +122,12 @@ class HistoryDisplayManager:
         """
         self.history_list.clear()
 
-        entries = self.history.get_entries(limit=50)
+        entries = self.history.get_entries(limit=MAX_HISTORY_ENTRIES)
 
         for entry in entries:
             # Only add "..." if the result is actually truncated
-            result_display = entry.result_text[:20]
-            if len(entry.result_text) > 20:
+            result_display = entry.result_text[:MAX_RESULT_DISPLAY_LENGTH]
+            if len(entry.result_text) > MAX_RESULT_DISPLAY_LENGTH:
                 result_display += "..."
             item_text = f"√({entry.input_value}) ≈ {result_display}"
 
@@ -117,7 +143,7 @@ class HistoryDisplayManager:
         self.history.clear()
         self.update_display()
 
-    def get_selected_entry(self):
+    def get_selected_entry(self) -> Optional[HistoryEntry]:
         """Get the currently selected history entry.
 
         Получить выбранную запись истории.

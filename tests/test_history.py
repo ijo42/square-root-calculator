@@ -1,7 +1,10 @@
 """Tests for history manager."""
 
-import pytest
-from square_root_calculator.core.history import HistoryManager, HistoryEntry
+import pytest  # noqa: F401
+from square_root_calculator.core.history import (  # noqa: F401
+    HistoryManager,
+    HistoryEntry,
+)
 
 
 class TestHistoryEntry:

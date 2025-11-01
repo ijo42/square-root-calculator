@@ -5,7 +5,6 @@
 
 import urllib.request
 import urllib.error
-import json
 from typing import Optional, Tuple
 
 
@@ -124,10 +123,10 @@ class UpdateChecker:
                 current_parts.append(0)
 
             # Compare each part
-            for l, c in zip(latest_parts, current_parts):
-                if l > c:
+            for latest_part, current_part in zip(latest_parts, current_parts):
+                if latest_part > current_part:
                     return True
-                elif l < c:
+                elif latest_part < current_part:
                     return False
 
             return False  # Versions are equal

@@ -1,6 +1,5 @@
 """Square Root Calculator - A comprehensive calculator for computing square roots."""
 
-import os
 import sys
 from pathlib import Path
 
@@ -16,7 +15,7 @@ def get_version() -> str:
     """
     try:
         # For PyInstaller bundled app, use _MEIPASS
-        if getattr(sys, 'frozen', False):
+        if getattr(sys, "frozen", False):
             base_path = Path(sys._MEIPASS)
             pyproject_path = base_path / "pyproject.toml"
         else:
@@ -30,7 +29,7 @@ def get_version() -> str:
                     pyproject_path = test_path
                     break
                 current_dir = current_dir.parent
-        
+
         if pyproject_path and pyproject_path.exists():
             # Read and parse pyproject.toml
             with open(pyproject_path, "r", encoding="utf-8") as f:
