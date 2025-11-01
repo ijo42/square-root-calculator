@@ -3,7 +3,6 @@
 Главное окно GUI для Калькулятора квадратного корня.
 """
 
-import re
 import sys
 from PyQt6.QtWidgets import (
     QApplication,
@@ -18,7 +17,6 @@ from PyQt6.QtWidgets import (
     QTextEdit,
     QGroupBox,
     QMessageBox,
-    QMenu,
     QSlider,
     QTabWidget,
     QListWidget,
@@ -57,6 +55,10 @@ from .. import __version__
 from .update_thread import UpdateCheckThread
 from .components import apply_theme_to_window, get_output_stylesheet
 from .history_display import HistoryDisplayManager
+from .menu_builder import MenuBuilder
+from .result_formatter import ResultFormatter
+from .input_validator import InputValidator
+from .calculation_handler import CalculationHandler
 
 
 class MainWindow(QMainWindow):
@@ -79,6 +81,14 @@ class MainWindow(QMainWindow):
         self.history = HistoryManager()
         self.update_checker = UpdateChecker(
             "ijo42", "square-root-calculator", __version__
+        )
+
+        # Initialize helper classes
+        self.menu_builder = MenuBuilder(self)
+        self.result_formatter = ResultFormatter(self.translator, self.settings)
+        self.input_validator = InputValidator(self.translator)
+        self.calculation_handler = CalculationHandler(
+            self.calculator, self.translator, self.input_validator
         )
 
         self.init_ui()
@@ -426,75 +436,11 @@ class MainWindow(QMainWindow):
         return splitter
 
     def create_menu_bar(self):
-        """Create the menu bar."""
-        menubar = self.menuBar()
+        """Create the menu bar using MenuBuilder.
 
-        # Settings menu
-        self.settings_menu = menubar.addMenu("Settings")
-
-        # Theme submenu
-        self.theme_menu = QMenu("Theme", self)
-        self.settings_menu.addMenu(self.theme_menu)
-
-        self.light_theme_action = QAction("Light Theme", self)
-        self.light_theme_action.setCheckable(True)
-        self.light_theme_action.setChecked(self.settings.get("theme") == "light")
-        self.light_theme_action.triggered.connect(lambda: self.change_theme("light"))
-        self.theme_menu.addAction(self.light_theme_action)
-
-        self.dark_theme_action = QAction("Dark Theme", self)
-        self.dark_theme_action.setCheckable(True)
-        self.dark_theme_action.setChecked(self.settings.get("theme") == "dark")
-        self.dark_theme_action.triggered.connect(lambda: self.change_theme("dark"))
-        self.theme_menu.addAction(self.dark_theme_action)
-
-        self.settings_menu.addSeparator()
-
-        # Show exact precision field toggle
-        self.show_exact_precision_action = QAction("Show Exact Precision Field", self)
-        self.show_exact_precision_action.setCheckable(True)
-        self.show_exact_precision_action.setChecked(
-            self.settings.get("show_exact_precision", False)
-        )
-        self.show_exact_precision_action.triggered.connect(self.toggle_exact_precision)
-        self.settings_menu.addAction(self.show_exact_precision_action)
-
-        # Show negative roots toggle
-        self.show_negative_roots_action = QAction("Show Negative Roots", self)
-        self.show_negative_roots_action.setCheckable(True)
-        self.show_negative_roots_action.setChecked(
-            self.settings.get("show_negative_roots", False)
-        )
-        self.show_negative_roots_action.triggered.connect(self.toggle_negative_roots)
-        self.settings_menu.addAction(self.show_negative_roots_action)
-
-        # Language menu
-        self.language_menu = menubar.addMenu("Language")
-        self.language_actions = {}
-        self.build_language_menu()
-
-        # Help menu
-        self.help_menu = menubar.addMenu("Help")
-
-        self.user_manual_action = QAction("User Manual", self)
-        self.user_manual_action.triggered.connect(self.open_user_manual)
-        self.help_menu.addAction(self.user_manual_action)
-
-        self.help_menu.addSeparator()
-
-        self.check_updates_action = QAction("Check for Updates", self)
-        self.check_updates_action.triggered.connect(self.check_for_updates_manual)
-        self.help_menu.addAction(self.check_updates_action)
-
-        self.help_menu.addSeparator()
-
-        self.about_action = QAction("About", self)
-        self.about_action.triggered.connect(self.show_about)
-        self.help_menu.addAction(self.about_action)
-
-        self.help_action = QAction("Help", self)
-        self.help_action.triggered.connect(self.show_help)
-        self.help_menu.addAction(self.help_action)
+        Создать строку меню с использованием MenuBuilder.
+        """
+        self.menu_builder.create_menu_bar()
 
     def update_ui_text(self):
         """Update all UI text based on current language."""
@@ -678,93 +624,27 @@ class MainWindow(QMainWindow):
         except Exception as e:
             self.show_error(str(e))
 
-    def normalize_number_input(self, text: str) -> str:
-        """Normalize number input by replacing comma with dot and validating.
-
-        Нормализовать числовой ввод, заменяя запятую на точку и проверяя.
-
-        Args:
-            text: Input text to normalize
-
-        Returns:
-            Normalized number string
-
-        Raises:
-            InvalidInputError: If input contains invalid characters
-        """
-        if not text:
-            return text
-
-        # Check for invalid characters before normalization
-        # Allow: digits, comma OR dot (but not both in validation), minus, plus, 'i' character, and whitespace
-        if not re.match(r"^[0-9.,\-+i\s]+$", text):
-            raise InvalidInputError(
-                self.translator.get("invalid_input")
-                + ": "
-                + self.translator.get("text_instead_of_numbers")
-            )
-
-        # Replace comma with dot for decimal separator
-        normalized = text.replace(",", ".")
-
-        # Additional validation: check for multiple decimal points in a single number
-        # For complex numbers, handle real and imaginary parts separately
-        if "i" in normalized:
-            # Remove 'i' and split by + or - (keeping the sign)
-            temp = normalized.replace("i", "")
-            # Split but keep delimiters
-            parts = re.split(r"(\+|\-)", temp)
-            # Reconstruct parts and check each number component
-            current = ""
-            for i, part in enumerate(parts):
-                if part in ["+", "-"]:
-                    if current and current.count(".") > 1:
-                        raise InvalidInputError(
-                            self.translator.get("invalid_input")
-                            + ": Multiple decimal separators"
-                        )
-                    current = part if i == 0 else ""
-                else:
-                    current += part
-                    if i == len(parts) - 1 and current and current.count(".") > 1:
-                        raise InvalidInputError(
-                            self.translator.get("invalid_input")
-                            + ": Multiple decimal separators"
-                        )
-        else:
-            # Simple number - just check for multiple dots
-            if normalized.strip().count(".") > 1:
-                raise InvalidInputError(
-                    self.translator.get("invalid_input")
-                    + ": Multiple decimal separators"
-                )
-
-        return normalized
-
     def calculate(self, from_history=False):
-        """Perform calculation based on current mode.
+        """Perform calculation based on current mode using CalculationHandler.
+
+        Выполнить вычисление на основе текущего режима с использованием CalculationHandler.
 
         Args:
-            from_history: Whether this calculation is from history recall (don't add to history again)
+            from_history: Whether this calculation is from history recall
         """
         try:
             # Check which tab is active
             if self.mode_tabs.currentIndex() == 0:
                 # Real mode
                 value = self.input_field.text().strip()
-                if not value:
-                    raise InvalidInputError(self.translator.get("invalid_input"))
-                # Normalize input (handle comma as decimal separator)
-                value = self.normalize_number_input(value)
-                result = self.calculator.calculate(value)
+                result = self.calculation_handler.calculate_real(value)
             else:
                 # Complex mode
-                real_str = self.real_part_field.text().strip() or "0"
-                imag_str = self.imag_part_field.text().strip() or "0"
-                # Normalize inputs
-                real_str = self.normalize_number_input(real_str)
-                imag_str = self.normalize_number_input(imag_str)
-                result = self.calculator.calculate(None, real_str, imag_str)
+                real_str = self.real_part_field.text().strip()
+                imag_str = self.imag_part_field.text().strip()
+                result = self.calculation_handler.calculate_complex(
+                    real_str, imag_str
+                )
 
             # Display unified result
             self.display_result(result)
@@ -773,109 +653,20 @@ class MainWindow(QMainWindow):
             if not from_history:
                 self.add_to_history(result)
 
-        except InvalidInputError as e:
-            self.show_error(str(e))
-        except PrecisionError as e:
-            # Handle precision errors with proper translation
-            if e.is_generic:
-                error_msg = self.translator.get("precision_error_generic").format(
-                    e.current_precision, e.required_precision
-                )
-            else:
-                error_msg = self.translator.get("precision_too_low").format(
-                    e.required_precision
-                )
+        except (InvalidInputError, PrecisionError, CalculatorError, Exception) as e:
+            error_msg = self.calculation_handler.format_error_message(e)
             self.show_error(error_msg)
-        except CalculatorError as e:
-            self.show_error(self.translator.get("calculation_error").format(str(e)))
-        except Exception as e:
-            self.show_error(self.translator.get("calculation_error").format(str(e)))
 
     def display_result(self, result: CalculationResult):
-        """Display calculation result in unified format."""
+        """Display calculation result in unified format using ResultFormatter.
+
+        Отобразить результат вычисления в едином формате с использованием ResultFormatter.
+
+        Args:
+            result: Calculation result to display
+        """
         self.result_display.clear()
-
-        # Build HTML output
-        output = "<div style='font-family: Courier New; font-size: 13px;'>"
-
-        # Input
-        output += f"<p style='margin: 5px 0;'><b>{self.translator.get('input_label')}</b> {result.input_value}</p>"
-
-        # Roots section
-        output += f"<p style='margin: 10px 0 5px 0;'><b>{self.translator.get('roots_label')}</b></p>"
-
-        formatted_roots = result.get_formatted_roots()
-        show_negative = self.settings.get("show_negative_roots", False)
-
-        if len(formatted_roots) >= 1:
-            pos_root_label = self.translator.get('root_positive')
-            output += (
-                f"<p style='margin: 3px 0 3px 20px; color: #0066cc;'>"
-                f"<b>{pos_root_label}</b> +√({result.input_value}) = "
-                f"{formatted_roots[0]}</p>"
-            )
-
-            if show_negative and len(formatted_roots) >= 2:
-                neg_root_label = self.translator.get('root_negative')
-                output += (
-                    f"<p style='margin: 3px 0 3px 20px; color: #0066cc;'>"
-                    f"<b>{neg_root_label}</b> -√({result.input_value}) = "
-                    f"{formatted_roots[1]}</p>"
-                )
-
-        # Representations/Alternative forms
-        representations = result.get_representations()
-        if representations:
-            if result.is_complex:
-                alt_forms = self.translator.get('alternative_forms')
-                output += (
-                    f"<p style='margin: 10px 0 5px 0;'>"
-                    f"<b>{alt_forms}</b></p>"
-                )
-
-                if "polar" in representations:
-                    polar_label = self.translator.get('polar_form')
-                    output += (
-                        f"<p style='margin: 3px 0 3px 20px;'>"
-                        f"<b>{polar_label}</b> {representations['polar']}</p>"
-                    )
-
-                if "exponential" in representations:
-                    exp_label = self.translator.get('exponential_form')
-                    output += (
-                        f"<p style='margin: 3px 0 3px 20px;'>"
-                        f"<b>{exp_label}</b> {representations['exponential']}</p>"
-                    )
-            else:
-                repr_label = self.translator.get('representations_label')
-                output += (
-                    f"<p style='margin: 10px 0 5px 0;'>"
-                    f"<b>{repr_label}</b></p>"
-                )
-
-                if "decimal" in representations:
-                    dec_label = self.translator.get('decimal_repr')
-                    output += (
-                        f"<p style='margin: 3px 0 3px 20px;'>"
-                        f"<b>{dec_label}</b> {representations['decimal']}</p>"
-                    )
-
-                if "scientific" in representations:
-                    sci_label = self.translator.get('scientific_repr')
-                    output += (
-                        f"<p style='margin: 3px 0 3px 20px;'>"
-                        f"<b>{sci_label}</b> {representations['scientific']}</p>"
-                    )
-
-                if "fraction" in representations:
-                    frac_label = self.translator.get('fraction_repr')
-                    output += (
-                        f"<p style='margin: 3px 0 3px 20px;'>"
-                        f"<b>{frac_label}</b> {representations['fraction']}</p>"
-                    )
-
-        output += "</div>"
-
+        output = self.result_formatter.build_result_html(result)
         self.result_display.setHtml(output)
 
     def add_to_history(self, result: CalculationResult):
@@ -890,52 +681,53 @@ class MainWindow(QMainWindow):
         """Handle double-click on history item - recalculate with same parameters.
 
         Обработать двойной клик по элементу истории - пересчитать с теми же параметрами.
+
+        Args:
+            item: The list widget item that was double-clicked
         """
         entry = self.history_display.get_selected_entry()
+        if not entry:
+            return
 
-        if entry:
-            # Save current precision
-            current_precision = self.calculator.precision
+        current_precision = self.calculator.precision
 
-            # Set precision from history entry
-            if entry.precision:
-                self.calculator.set_precision(entry.precision)
-                self.precision_value_label.setText(str(entry.precision))
-                if entry.precision <= 200:
-                    self.precision_slider.blockSignals(True)
-                    self.precision_slider.setValue(entry.precision)
-                    self.precision_slider.blockSignals(False)
-                self.precision_spinbox.blockSignals(True)
-                self.precision_spinbox.setValue(entry.precision)
-                self.precision_spinbox.blockSignals(False)
+        # Apply history entry settings
+        if entry.precision:
+            self._apply_precision_from_history(entry.precision)
 
-            # Set mode and input fields from history entry
-            if entry.is_complex:
-                # Switch to complex mode
-                self.mode_tabs.setCurrentIndex(1)
-                # Set real and imaginary parts
-                self.real_part_field.setText(entry.real_part or "0")
-                self.imag_part_field.setText(entry.imag_part or "0")
-            else:
-                # Switch to real mode
-                self.mode_tabs.setCurrentIndex(0)
-                # Set input value
-                self.input_field.setText(entry.input_value)
+        self._set_input_from_history(entry)
+        self.calculate(from_history=True)
 
-            # Perform calculation (from_history=True to not add to history again)
-            self.calculate(from_history=True)
+        # Restore original precision if it was different
+        if current_precision != entry.precision and entry.precision:
+            self._apply_precision_from_history(current_precision)
 
-            # Restore precision if it was different
-            if current_precision != entry.precision and entry.precision:
-                self.calculator.set_precision(current_precision)
-                self.precision_value_label.setText(str(current_precision))
-                if current_precision <= 200:
-                    self.precision_slider.blockSignals(True)
-                    self.precision_slider.setValue(current_precision)
-                    self.precision_slider.blockSignals(False)
-                self.precision_spinbox.blockSignals(True)
-                self.precision_spinbox.setValue(current_precision)
-                self.precision_spinbox.blockSignals(False)
+    def _apply_precision_from_history(self, precision: int):
+        """Apply precision value from history entry.
+
+        Применить значение точности из записи истории.
+
+        Args:
+            precision: Precision value to apply
+        """
+        self.calculator.set_precision(precision)
+        self._sync_precision_widgets(precision)
+
+    def _set_input_from_history(self, entry):
+        """Set input fields based on history entry.
+
+        Установить поля ввода на основе записи истории.
+
+        Args:
+            entry: History entry to restore
+        """
+        if entry.is_complex:
+            self.mode_tabs.setCurrentIndex(1)
+            self.real_part_field.setText(entry.real_part or "0")
+            self.imag_part_field.setText(entry.imag_part or "0")
+        else:
+            self.mode_tabs.setCurrentIndex(0)
+            self.input_field.setText(entry.input_value)
 
     def clear_history(self):
         """Clear calculation history."""
