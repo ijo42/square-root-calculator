@@ -43,6 +43,21 @@ from ..core.calculator import (
 from ..core.history import HistoryManager
 from ..core.update_checker import UpdateChecker
 from ..core.settings import Settings
+from ..core.constants import (
+    LABEL_MIN_WIDTH,
+    INPUT_MIN_WIDTH,
+    PRECISION_GROUP_MIN_WIDTH,
+    WINDOW_MIN_WIDTH,
+    WINDOW_MIN_HEIGHT,
+    PRECISION_SLIDER_MIN,
+    PRECISION_SLIDER_MAX,
+    PRECISION_SPINBOX_MIN,
+    PRECISION_SPINBOX_MAX,
+    PRECISION_SLIDER_TICK_INTERVAL,
+    DEFAULT_PRECISION,
+    SPLITTER_RESULT_SIZE,
+    SPLITTER_HISTORY_SIZE,
+)
 from ..locales.translator import Translator
 from .. import __version__
 from .update_thread import UpdateCheckThread
@@ -55,11 +70,6 @@ class MainWindow(QMainWindow):
 
     Главное окно приложения.
     """
-
-    # UI dimension constants
-    LABEL_MIN_WIDTH = 120
-    INPUT_MIN_WIDTH = 200
-    PRECISION_GROUP_MIN_WIDTH = 250
 
     def __init__(self):
         super().__init__()
@@ -96,8 +106,8 @@ class MainWindow(QMainWindow):
         Инициализировать пользовательский интерфейс.
         """
         self.setWindowTitle(self.translator.get("app_title"))
-        self.setMinimumWidth(800)
-        self.setMinimumHeight(600)
+        self.setMinimumWidth(WINDOW_MIN_WIDTH)
+        self.setMinimumHeight(WINDOW_MIN_HEIGHT)
 
         # Create menu bar
         self.create_menu_bar()
@@ -130,14 +140,14 @@ class MainWindow(QMainWindow):
 
         real_input_layout = QHBoxLayout()
         self.input_label = QLabel()
-        self.input_label.setMinimumWidth(self.LABEL_MIN_WIDTH)
+        self.input_label.setMinimumWidth(LABEL_MIN_WIDTH)
         self.input_label.setStyleSheet("font-size: 14px;")
         real_input_layout.addWidget(self.input_label)
         real_input_layout.addStretch()
         self.input_field = QLineEdit()
         self.input_field.setPlaceholderText("0")
-        self.input_field.setMinimumWidth(self.INPUT_MIN_WIDTH)
-        self.input_field.setMaximumWidth(self.INPUT_MIN_WIDTH)
+        self.input_field.setMinimumWidth(INPUT_MIN_WIDTH)
+        self.input_field.setMaximumWidth(INPUT_MIN_WIDTH)
         self.input_field.setAlignment(Qt.AlignmentFlag.AlignRight)
         self.input_field.setStyleSheet("font-size: 14px;")
         real_input_layout.addWidget(self.input_field)
@@ -153,14 +163,14 @@ class MainWindow(QMainWindow):
 
         real_row = QHBoxLayout()
         self.real_part_label = QLabel()
-        self.real_part_label.setMinimumWidth(self.LABEL_MIN_WIDTH)
+        self.real_part_label.setMinimumWidth(LABEL_MIN_WIDTH)
         self.real_part_label.setStyleSheet("font-size: 14px;")
         real_row.addWidget(self.real_part_label)
         real_row.addStretch()
         self.real_part_field = QLineEdit()
         self.real_part_field.setPlaceholderText("0")
-        self.real_part_field.setMinimumWidth(self.INPUT_MIN_WIDTH)
-        self.real_part_field.setMaximumWidth(self.INPUT_MIN_WIDTH)
+        self.real_part_field.setMinimumWidth(INPUT_MIN_WIDTH)
+        self.real_part_field.setMaximumWidth(INPUT_MIN_WIDTH)
         self.real_part_field.setAlignment(Qt.AlignmentFlag.AlignRight)
         self.real_part_field.setStyleSheet("font-size: 14px;")
         real_row.addWidget(self.real_part_field)
@@ -168,14 +178,14 @@ class MainWindow(QMainWindow):
 
         imag_row = QHBoxLayout()
         self.imag_part_label = QLabel()
-        self.imag_part_label.setMinimumWidth(self.LABEL_MIN_WIDTH)
+        self.imag_part_label.setMinimumWidth(LABEL_MIN_WIDTH)
         self.imag_part_label.setStyleSheet("font-size: 14px;")
         imag_row.addWidget(self.imag_part_label)
         imag_row.addStretch()
         self.imag_part_field = QLineEdit()
         self.imag_part_field.setPlaceholderText("0")
-        self.imag_part_field.setMinimumWidth(self.INPUT_MIN_WIDTH)
-        self.imag_part_field.setMaximumWidth(self.INPUT_MIN_WIDTH)
+        self.imag_part_field.setMinimumWidth(INPUT_MIN_WIDTH)
+        self.imag_part_field.setMaximumWidth(INPUT_MIN_WIDTH)
         self.imag_part_field.setAlignment(Qt.AlignmentFlag.AlignRight)
         self.imag_part_field.setStyleSheet("font-size: 14px;")
         imag_row.addWidget(self.imag_part_field)
@@ -203,7 +213,7 @@ class MainWindow(QMainWindow):
         # Right side: Precision control with slider
         precision_group = QGroupBox()
         self.precision_group = precision_group
-        precision_group.setMinimumWidth(self.PRECISION_GROUP_MIN_WIDTH)
+        precision_group.setMinimumWidth(PRECISION_GROUP_MIN_WIDTH)
         precision_layout = QVBoxLayout()
 
         # Precision value display
@@ -211,7 +221,7 @@ class MainWindow(QMainWindow):
         self.precision_label = QLabel()
         self.precision_label.setStyleSheet("font-size: 14px;")
         precision_value_layout.addWidget(self.precision_label)
-        initial_precision = self.settings.get("precision", 4)
+        initial_precision = self.settings.get("precision", DEFAULT_PRECISION)
         self.precision_value_label = QLabel(str(initial_precision))
         self.precision_value_label.setStyleSheet("font-weight: bold; font-size: 16px;")
         precision_value_layout.addWidget(self.precision_value_label)
@@ -221,17 +231,17 @@ class MainWindow(QMainWindow):
 
         # Slider for quick adjustment
         self.slider_layout = QHBoxLayout()
-        self.slider_min_label = QLabel("1")
+        self.slider_min_label = QLabel(str(PRECISION_SLIDER_MIN))
         self.slider_layout.addWidget(self.slider_min_label)
         self.precision_slider = QSlider(Qt.Orientation.Horizontal)
-        self.precision_slider.setMinimum(1)
-        self.precision_slider.setMaximum(200)
+        self.precision_slider.setMinimum(PRECISION_SLIDER_MIN)
+        self.precision_slider.setMaximum(PRECISION_SLIDER_MAX)
         self.precision_slider.setValue(initial_precision)
         self.precision_slider.setTickPosition(QSlider.TickPosition.TicksBelow)
-        self.precision_slider.setTickInterval(20)
+        self.precision_slider.setTickInterval(PRECISION_SLIDER_TICK_INTERVAL)
         self.precision_slider.valueChanged.connect(self.precision_slider_changed)
         self.slider_layout.addWidget(self.precision_slider)
-        self.slider_max_label = QLabel("200")
+        self.slider_max_label = QLabel(str(PRECISION_SLIDER_MAX))
         self.slider_max_label.setStyleSheet("font-size: 13px;")
         precision_layout.addLayout(self.slider_layout)
 
@@ -242,8 +252,8 @@ class MainWindow(QMainWindow):
         self.spinbox_label = spinbox_label
         self.spinbox_layout.addWidget(spinbox_label)
         self.precision_spinbox = QSpinBox()
-        self.precision_spinbox.setMinimum(1)
-        self.precision_spinbox.setMaximum(1000)
+        self.precision_spinbox.setMinimum(PRECISION_SPINBOX_MIN)
+        self.precision_spinbox.setMaximum(PRECISION_SPINBOX_MAX)
         self.precision_spinbox.setValue(initial_precision)
         self.precision_spinbox.setStyleSheet("font-size: 14px;")
         self.precision_spinbox.valueChanged.connect(self.precision_spinbox_changed)
@@ -324,7 +334,7 @@ class MainWindow(QMainWindow):
         splitter.addWidget(history_group)
 
         # Set initial splitter sizes (60% result, 40% history)
-        splitter.setSizes([480, 320])
+        splitter.setSizes([SPLITTER_RESULT_SIZE, SPLITTER_HISTORY_SIZE])
 
         # Update all text
         self.update_ui_text()
@@ -561,12 +571,30 @@ class MainWindow(QMainWindow):
         url = "https://github.com/ijo42/square-root-calculator/blob/master/README.md"
         QDesktopServices.openUrl(QUrl(url))
 
-    def precision_slider_changed(self, value):
-        """Handle precision slider change."""
+    def _sync_precision_widgets(self, value: int):
+        """Synchronize all precision widgets to the same value.
+
+        Синхронизировать все виджеты точности с одним значением.
+
+        Args:
+            value: Precision value to set
+        """
         self.precision_value_label.setText(str(value))
+        
+        # Update slider if value is within its range
+        if value <= PRECISION_SLIDER_MAX:
+            self.precision_slider.blockSignals(True)
+            self.precision_slider.setValue(value)
+            self.precision_slider.blockSignals(False)
+        
+        # Update spinbox
         self.precision_spinbox.blockSignals(True)
         self.precision_spinbox.setValue(value)
         self.precision_spinbox.blockSignals(False)
+
+    def precision_slider_changed(self, value):
+        """Handle precision slider change."""
+        self._sync_precision_widgets(value)
         try:
             self.calculator.set_precision(value)
             self.settings.set("precision", value)
@@ -575,11 +603,7 @@ class MainWindow(QMainWindow):
 
     def precision_spinbox_changed(self, value):
         """Handle precision spinbox change."""
-        self.precision_value_label.setText(str(value))
-        if value <= 200:
-            self.precision_slider.blockSignals(True)
-            self.precision_slider.setValue(value)
-            self.precision_slider.blockSignals(False)
+        self._sync_precision_widgets(value)
         try:
             self.calculator.set_precision(value)
             self.settings.set("precision", value)

@@ -7,6 +7,14 @@ import decimal
 from decimal import Decimal, getcontext
 from typing import Union, Dict, List, Tuple
 
+from .constants import (
+    MAX_SCIENTIFIC_PRECISION,
+    MAX_FRACTION_VALUE,
+    MAX_FRACTION_DENOMINATOR,
+    FRACTION_TOLERANCE,
+    MAX_POLAR_PRECISION,
+)
+
 
 class CalculatorError(Exception):
     """Base exception for calculator errors.
@@ -158,18 +166,18 @@ class CalculationResult:
 
             # Scientific notation
             try:
-                exp_notation = f"{float(real_val):.{min(15, self.precision)}e}"
+                exp_notation = f"{float(real_val):.{min(MAX_SCIENTIFIC_PRECISION, self.precision)}e}"
                 representations["scientific"] = exp_notation
             except:
                 pass
 
             # Fractional approximation (for small numbers)
-            if abs(real_val) < 1000:
+            if abs(real_val) < MAX_FRACTION_VALUE:
                 try:
                     from fractions import Fraction
 
-                    frac = Fraction(float(real_val)).limit_denominator(10000)
-                    if abs(float(frac) - float(real_val)) < 0.0001:
+                    frac = Fraction(float(real_val)).limit_denominator(MAX_FRACTION_DENOMINATOR)
+                    if abs(float(frac) - float(real_val)) < FRACTION_TOLERANCE:
                         representations["fraction"] = (
                             f"{frac.numerator}/{frac.denominator}"
                         )
@@ -187,9 +195,9 @@ class CalculationResult:
                 theta = math.atan2(float(imag_val), float(real_val))
                 theta_deg = math.degrees(theta)
 
-                r_fmt = self._format_decimal(Decimal(str(r)), min(10, self.precision))
+                r_fmt = self._format_decimal(Decimal(str(r)), min(MAX_POLAR_PRECISION, self.precision))
                 theta_fmt = self._format_decimal(
-                    Decimal(str(theta)), min(10, self.precision)
+                    Decimal(str(theta)), min(MAX_POLAR_PRECISION, self.precision)
                 )
 
                 representations["polar"] = (

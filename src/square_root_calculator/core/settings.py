@@ -67,8 +67,8 @@ class Settings:
             Language code ('en', 'ru', etc.)
         """
         try:
-            # Try to get system locale
-            system_locale = locale.getdefaultlocale()[0]
+            # Try to get system locale using the recommended approach
+            system_locale = locale.getlocale()[0]
             if system_locale:
                 # Extract language code (e.g., 'en_US' -> 'en', 'ru_RU' -> 'ru')
                 lang_code = system_locale.split("_")[0].lower()
